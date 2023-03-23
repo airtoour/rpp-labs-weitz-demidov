@@ -47,7 +47,7 @@ for elem in arr_list:
 print("Массив после замены нулевых элементов на среднее арифметическое:")
 for i in range(len(arr_list)):
     if arr_list[i] == 0:
-        arr_list[i] = round(avg_elem, 0)
+        arr_list[i] = round(avg_elem)
 
 # Выводим массив после замены нулевых элементов
 for elem in arr_list:
