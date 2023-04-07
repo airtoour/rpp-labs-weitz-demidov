@@ -21,10 +21,9 @@ op1 = conn.getresponse().read().decode()
 op1_json = json.loads(op1)
 op1_json = op1_json['number']
 # Вывод на экран значение переменной op1.
-print(op1)
 
 # Вывод на экран значения.
-print("Ответ на п.2: ", op_json, ",", op1_json, ",", op_json*op1_json)
+print("Ответ на п.2: ", op1, ",", op_json, ",", op1_json, ",", round(op_json * op1_json,2))
 
 # Пункт 3
 # Создание переменной head, которой присваем значение заголовок "Content-Type" и тип содержимого 'application/x-www-form-urlencoded'
@@ -34,8 +33,8 @@ conn.request("POST", "/number/", "option=1", headers=head)
 op = conn.getresponse().read().decode()
 op2_json = json.loads(op)
 op2_json = op2_json['number']
-print("Ответ на п.3: ", op, ",", op2_json, ",", round(op1_json/op2_json))
-conn.close
+print("Ответ на п.3: ", op, ",", op2_json, ",", round(op1_json / op2_json, 2))
+conn.close()
 
 # Пункт 4
 # Создается переменная head, в которой присваивается значение заголовка "Content-Type" и тип содержимого 'application/json'
@@ -45,8 +44,8 @@ conn.request("PUT", "/number/", body=json.dumps(body), headers=head)
 op = conn.getresponse().read().decode()
 op2_json = json.loads(op)
 op2_json = op2_json["number"]
-print("Ответ на п.4: ", op, ",", op2_json, ",", op1_json-op2_json)
-conn.close
+print("Ответ на п.4: ", op, ",", op2_json, ",", op1_json - op2_json)
+conn.close()
 
 # Пункт 5
 body = {"option": 1}
@@ -54,5 +53,5 @@ conn.request("DELETE", "/number/", body=json.dumps(body))
 op = conn.getresponse().read().decode()
 op3_json = json.loads(op)
 op3_json = op3_json["number"]
-print("Ответ на п.5: ", op, ",", op3_json, ",", op2_json*op3_json)
-conn.close
+print("Ответ на п.5: ", op, ",", op3_json, ",", op2_json * op3_json)
+conn.close()
