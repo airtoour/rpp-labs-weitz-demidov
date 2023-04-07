@@ -20,10 +20,9 @@ conn.request('GET', '/number/?option=1')
 op1 = conn.getresponse().read().decode()
 op1_json = json.loads(op1)
 op1_json = op1_json['number']
-# Вывод на экран значение переменной op1.
 
 # Вывод на экран значения.
-print("Ответ на п.2: ", op1, ",", op_json, ",", op1_json, ",", round(op_json * op1_json,2))
+print("Ответ на п.2: ", op1, ",", op_json, ",", op1_json, ",", round(op_json * op1_json, 2))
 
 # Пункт 3
 # Создание переменной head, которой присваем значение заголовок "Content-Type" и тип содержимого 'application/x-www-form-urlencoded'
