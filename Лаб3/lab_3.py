@@ -40,6 +40,8 @@ decode_body = op1.read().decode()
 # Преобразуем строку JSON в объект Python типа dict и извлекаем значение поля number
 obj1 = json.loads(decode_body)['number']
 
+conn.close()
+
 # Выводим на экран значение переменной obj1
 print("Вывод П.1: ", obj1)
 
@@ -58,6 +60,8 @@ decode_body2 = op2.read().decode()
 
 # Вызов функции operate с параметрами decode_body2 и obj1, сохранение результата в переменной obj2
 obj2 = operate(decode_body2, obj1)
+
+conn.close()
 
 # Вывод значения переменной left
 print("Вывод П.2: ", obj2)
@@ -79,6 +83,8 @@ decode_body3 = op3.read().decode()
 # Вызов функции operate с параметрами decode_body3 и obj2, сохранение результата в переменной obj3
 obj3 = operate(decode_body3, obj2)
 
+conn.close()
+
 # Вывод значения переменной left
 print("Вывод П.3: ", obj3)
 
@@ -99,6 +105,8 @@ decode_body4 = op4.read().decode()
 # Вызов функции operate с параметрами decode_body4 и obj3, сохранение результата в переменной obj4
 obj4 = operate(decode_body4, obj3)
 
+conn.close()
+
 # Вывод результата работы функции operate()
 print("Вывод П.4: ", round(obj4, 2))
 
@@ -118,6 +126,8 @@ decoded_body5 = op5.read().decode()
 
 # Вызов функции operate с параметрами decode_body5 и obj4, сохранение результата в переменной obj5
 obj5 = operate(decoded_body5, obj4)
+
+conn.close()
 
 # Вывод результата работы функции operate()
 print("Вывод П.5: ", round(obj5, 2))
