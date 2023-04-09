@@ -55,7 +55,7 @@ async def handle_user_input(message: types.Message):
         try:
             curr_amount = float(message.text)
             if curr_name == RUB:
-                # Convert RUB to USD
+                # Конвертация рубля в доллар
                 usd_amount = curr_amount * RUB_TO_USD
                 await message.reply(f"{curr_amount:.2f} {RUB} = {usd_amount:.2f} {USD}")
                 await message.reply(f"Для повторной конвертации напишите новое название валюты или команду /start")
