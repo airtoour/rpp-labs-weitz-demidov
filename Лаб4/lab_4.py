@@ -1,22 +1,20 @@
 import os
 import logging
 
-from aiogram import Bot, types
-from aiogram.dispatcher import Dispatcher
-from aiogram.utils import executor
+from aiogram import Bot, types, executor, Dispatcher
 
-API_TOKEN = os.getenv('TELEGRAM_API_TOKEN')
-logging.basicConfig(level=logging.INFO)
+TOKEN = "6165848339:AAE2sRqeBVZ7ss23Kw9J9zIx-0I7I5mWu5c"
+logging.basicConfig(level = logging.INFO)
 
-bot = Bot(token='6165848339:AAE2sRqeBVZ7ss23Kw9J9zIx-0I7I5mWu5c')
-dp = Dispatcher(bot)
+bot = Bot(token = TOKEN)
+dp = Dispatcher(bot = bot)
 
 # Опредение названия валют и их курсы
 RUB = 'RUB'
 USD = 'USD'
 
-RUB_TO_USD = 0.013
-USD_TO_RUB = 75.69
+rub_to_usd = 0.013
+usd_to_rub = 75.69
 
 # Определите глобальные переменные для хранения пользовательских входных данных
 curr_name = None
@@ -56,12 +54,12 @@ async def handle_user_input(message: types.Message):
             curr_amount = float(message.text)
             if curr_name == RUB:
                 # Конвертация рубля в доллар
-                usd_amount = curr_amount * RUB_TO_USD
+                usd_amount = curr_amount * rub_to_usd
                 await message.reply(f"{curr_amount:.2f} {RUB} = {usd_amount:.2f} {USD}")
                 await message.reply(f"Для повторной конвертации напишите новое название валюты или команду /start")
             else:
                 # Конвертация доллара в рубль
-                rub_amount = curr_amount * USD_TO_RUB
+                rub_amount = curr_amount * usd_to_rub
                 await message.reply(f"{curr_amount:.2f} {USD} = {rub_amount:.2f} {RUB}")
                 await message.reply(f"Для повторной конвертации напишите новое название валюты или команду /start")
         except ValueError:
