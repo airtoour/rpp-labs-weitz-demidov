@@ -21,7 +21,7 @@ buttons = [
 ]
 
 # Создание объекта класса InlineKeyboardMarkup с передачей списка кнопок в конструктор
-keyboard = types.InlineKeyboardMarkup(row_width=2)
+keyboard = types.InlineKeyboardMarkup(row_width=4)
 keyboard.add(*buttons)
 
 # Опредение названия валют и их курсы
