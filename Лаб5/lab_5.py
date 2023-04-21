@@ -3,7 +3,7 @@ import random
 
 # Создает таблицу пользователей базы данных
 def create_users_table():
-    conn = sqlite3.connect('users_in_bot.db')
+    conn = sqlite3.connect('users.db')
     c = conn.cursor()
     c.execute('''create table users(
                  user_id integer primary key,
@@ -16,13 +16,12 @@ def create_users_table():
 def insert_user(user_name, user_email):
 
     # Создание соединения с базой данных
-    conn = sqlite3.connect('users_in_bot.db')
+    conn = sqlite3.connect('users.db')
     c = conn.cursor()
 
     # Добавление нового пользователя
-    c.execute('''insert into users (user_name, user_email) 
-                 values (?, ?)", (user_name, user_email)''')
-    
+    c.execute("insert into users (user_name, user_email) values (?, ?)", (user_name, user_email))
+
     # Сохранение изменений и закрытие соединения
     conn.commit()
     conn.close()
@@ -31,7 +30,7 @@ def insert_user(user_name, user_email):
 def get_all_users():
 
     # Создание соединения с базой данных
-    conn = sqlite3.connect('users_in_bot.db')
+    conn = sqlite3.connect('users.db')
     cursor = conn.cursor()
 
     # Получение всех пользователей
@@ -46,7 +45,7 @@ def get_all_users():
 def get_user_by_id(user_id):
 
     # Создание соединения с базой данных
-    conn = sqlite3.connect('users_in_bot.db')
+    conn = sqlite3.connect('users.db')
     c = conn.cursor()
 
     # Получения данных пользователя по user_id
@@ -60,7 +59,7 @@ def get_user_by_id(user_id):
 def delete_user_by_id(user_id):
 
     # Создание соединения с базой данных
-    conn = sqlite3.connect('users_in_bot.db')
+    conn = sqlite3.connect('users.db')
     c = conn.cursor()
 
     # Удаление пользвателя из БД
@@ -73,7 +72,7 @@ def delete_user_by_id(user_id):
 # Функция удаления таблицы ---------- от себя
 def drop_table_user():
     #Создание соединения с базой данных
-    conn = sqlite3.connect('users_in_bot.db')
+    conn = sqlite3.connect('users.db')
     c = conn.cursor()
 
     # Удаление пользвателя из БД
@@ -92,10 +91,10 @@ def main():
     print("Таблица users создана!")
 
     # Добавляем пользователей в таблицу
-    insert_user("Артур", "artur.gips@mail.ru")
-    insert_user("Саша",  "timoshenskiy.sasha02@mail.ru")
-    insert_user("Женя",  "kartigo02@mail.ru")
-    insert_user("Ваня",  "vanysha.vanya@mail.ru")
+    insert_user('Артур', 'artur.gips@mail.ru')
+    insert_user('Саша',  'timoshenskiy.sasha02@mail.ru')
+    insert_user('Женя',  'kartigo02@mail.ru')
+    insert_user('Ваня',  'vanysha.vanya@mail.ru')
 
     # Получаем всех пользователей и выводим их в консоль
     users = get_all_users()
@@ -106,18 +105,16 @@ def main():
     # Получаем пользователя по id и выводим его в консоль
     user_id = random.choice([1, 2, 3, 4])
     user = get_user_by_id(user_id)
-    print(f"Выбран пользователь для удаления: {user_id}: {user}")
+    print(f"Выбран пользователь для удаления: {user}")
 
 
     # Удаляем случайного пользователя по id
-    user_id = random.choice([1, 2, 3, 4])
+    user_id == random.choice([1, 2, 3, 4])
     delete_user_by_id(user_id)
 
     # Получаем всех пользователей после удаления и выводим их в консоль
     users = get_all_users()
-    print("Список пользователей после удаления: ")
-    for user in users:
-        print(user)
+    print(f"Список пользователей после удаления: {users}")
 
 if __name__ == "__main__":
     main()
