@@ -82,7 +82,6 @@ def drop_table_user():
     # Закрытие соединения
     conn.close()
 
-
 # Функция main(), которая выполняет все функции последовательно
 def main():
 
@@ -107,14 +106,15 @@ def main():
     user = get_user_by_id(user_id)
     print(f"Выбран пользователь для удаления: {user}")
 
-
     # Удаляем случайного пользователя по id
     user_id == random.choice([1, 2, 3, 4])
     delete_user_by_id(user_id)
 
     # Получаем всех пользователей после удаления и выводим их в консоль
     users = get_all_users()
-    print(f"Список пользователей после удаления: {users}")
+    print("Список пользователей после удаления: ")
+    for user in users:
+        print(users)
 
 if __name__ == "__main__":
     main()
