@@ -114,7 +114,7 @@ def main():
     users = get_all_users()
     print("Список пользователей после удаления: ")
     for user in users:
-        print(users)
+        print(user)
 
 if __name__ == "__main__":
     main()
