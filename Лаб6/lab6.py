@@ -26,12 +26,13 @@ dp  = Dispatcher(bot, storage = MemoryStorage())
 # Вывод записей из таблицы admin
 def get_from_admin():
     cursor = conn.cursor()
-    cursor.execute("""select *
+    cursor.execute("""select chat_id
                         from admin
                        where id = 1""")
-    df       = pd.DataFrame(cursor.fetchall())
+
+    df         = pd.DataFrame(cursor.fetchall())
     admin_list = []
-    admin_id = df
+    admin_id   = df
     if admin_id in admin_list:
         return (admin_list)
     else:
@@ -127,22 +128,22 @@ async def setup_bot_commands():
 async def start_name_process(message: types.Message):
     await message.answer("""Привет! Я бот для конвертации валюты. Для начала, выбери обозначение валюты с помощью действия ниже.
                             Вот какие команды я знаю:
-                            /get_currencies - посмотреть курсы валют,
-                            /convert - конвертировать валюту в рубль
-                            """)
+                            /manage_currency - Управлять валютами (Добавить валюту, Изменить валюту, Удалить валюту)
+                            /convert         - конвертировать валюту в рубль,
+                            /get_currencies  - посмотреть курсы валют""")
 
 # Конвертация валюты
 @dp.message_handler(commands = ['convert'])
 async def start_name_process(message: types.Message):
     await States.start_convert.set()
-    await message.answer("Введите название валюты:")
+    await message.answer("Введите название валюты (start_convert):")
 
 
 @dp.message_handler (state = States.start_convert)
 async def read_process(message: types.Message, state: FSMContext):
     currency = message.text
     await state.update_data(currency = currency)
-    await message.answer("Введите сумму в указанной валюте:")
+    await message.answer("Введите сумму в указанной валюте (next_convert):")
     await States.next_convert.set()
 
 
@@ -150,15 +151,18 @@ async def read_process(message: types.Message, state: FSMContext):
 async def convert_process (message: types.Message, state: FSMContext):
     summ         = message.text
     our_currency = await state.get_data()
-    rate         = select_rate_at_curr(our_currency['currency'])
-    result       = rate * int(summ)
-    await message.reply(result)
+    rate         = select_rate_at_curr(our_currency['rate'])
+    result       = int(rate) * int(summ)
+    await message.reply("(next_convert finish)", result)
     await state.finish()
 
 
 # Все валюты
 @dp.message_handler(commands = ['get_currencies'])
 async def start_name_process(message: types.Message):
+
+    currency_name = message.text
+    rate = message.text
     df = select_all_curr(currency_name, rate)
     await message.answer(df)
 
@@ -166,31 +170,27 @@ async def start_name_process(message: types.Message):
 @dp.message_handler(commands = ['manage_currency'])
 async def start_name_process(message: types.Message):
     buttons = [
-        #[
-            KeyboardButton(text = "Добавить валюту"),
-            KeyboardButton(text = "Удалить валюту"),
-            KeyboardButton(text = "Изменить курс валюты"),
-        #]
+        types.InlineKeyboardButton(text = 'Добавить валюту',      callback_data = 'add_curr_manage'),
+        types.InlineKeyboardButton(text = 'Удалить валюту',       callback_data = 'delete_curr_manage'),
+        types.InlineKeyboardButton(text = 'Изменить курс валюты', callback_data = 'update_curr_manage')
     ]
 
-    keyboard = ReplyKeyboardMarkup(
-        keyboard          = buttons,
-        resize_keyboard   = True,
-        one_time_keyboard = True
-    )
+    # Создание объекта класса InlineKeyboardMarkup с передачей списка кнопок в конструктор
+    keyboard = types.InlineKeyboardMarkup(row_width = 3)
+    keyboard.add(*buttons)
 
-    if str(message.chat.id) != ADMIN_ID:
-        await message.reply("У Вас нет доступа к команде! Вы обычный смертный пользователь))")
-    else:
-        await message.answer("О, Вы Админ!", reply_markup = keyboard)
-        await States.start_manage.set()
+   # if str(message.from_user.id) != ADMIN_ID:
+    #    await message.answer("У Вас нет доступа к команде! Вы обычный смертный пользователь))")
+    #else:
+    await message.answer("О, Вы Админ!", reply_markup = keyboard)
+    await States.start_manage.set()
 
 
 # Удаление валюты
-@dp.message_handler(lambda message: message.text == 'Удалить валюту',
+@dp.message_handler(lambda c: c.data == 'delete_curr_manage',
                     state = States.start_manage)
 async def delete_process (message: types.Message, state: FSMContext):
-    await message.answer("Введите название валюты:")
+    await message.answer("Введите название валюты: (start_manage to drop manage)")
     await States.drop_manage.set()
 
 @dp.message_handler (state = States.drop_manage)
@@ -198,22 +198,22 @@ async def delete_process (message: types.Message, state: FSMContext):
     currency = message.text
     await state.update_data(currency = str(currency))
     delete_curr(currency)
-    await message.answer("Валюта удалена!")
+    await message.answer("Валюта удалена! (drop manage finish)")
     await state.finish()
 
 
 # Изменение курса валюты
-@dp.message_handler(lambda message: message.text == 'Изменить курс валюты',
+@dp.message_handler(lambda c: c.data == 'update_curr_manage',
                     state = States.start_manage)
 async def update_currency_process (message: types.Message, state: FSMContext):
-    await message.answer("Введите название валюты:")
+    await message.answer("Введите название валюты: (update manage)")
     await States.update_manage.set()
 
 @dp.message_handler (state = States.update_manage)
 async def update_process (message: types.Message, state: FSMContext):
     currency = message.text
     await state.update_data(currency=currency)
-    await message.answer("Введите курс валюты к рублю:")
+    await message.answer("Введите курс валюты к рублю: (update process)")
     await States.update_process.set()
 
 @dp.message_handler (state = States.update_process)
@@ -227,7 +227,7 @@ async def update_process (message: types.Message, state: FSMContext):
 
 
 # Добавление валюты
-@dp.message_handler(lambda message: message.text == 'Добавить валюту',
+@dp.message_handler(lambda c: c.data == 'add_curr_manage',
                     state = States.start_manage)
 async def add_currency_process (message: types.Message, state: FSMContext):
     await message.answer("Введите название валюты:")
