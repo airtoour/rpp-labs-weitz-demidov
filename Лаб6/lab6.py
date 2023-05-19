@@ -7,6 +7,7 @@ from aiogram.dispatcher.filters.state   import State, StatesGroup
 from aiogram.dispatcher                 import FSMContext
 from aiogram.types.bot_command_scope    import BotCommandScopeChat, BotCommandScopeDefault
 from aiogram.types                      import KeyboardButton, ReplyKeyboardMarkup
+
 import psycopg2 as pg
 
 conn = pg.connect(user     = 'postgres',
@@ -19,77 +20,65 @@ cursor = conn.cursor()
 TOKEN = "6165848339:AAE2sRqeBVZ7ss23Kw9J9zIx-0I7I5mWu5c"
 logging.basicConfig(level = logging.INFO)
 
-bot = Bot(token      = TOKEN,
-          parse_mode = types.ParseMode.HTML)
+bot = Bot(token = TOKEN, parse_mode = types.ParseMode.HTML)
 dp  = Dispatcher(bot, storage = MemoryStorage())
 
 # Вывод записей из таблицы admin
 def get_from_admin():
-    cursor = conn.cursor()
     cursor.execute("""select chat_id
                         from admin
                        where id = 1""")
+    admin_id = cursor.fetchone()
+    return admin_id[0] if admin_id else None
 
-    df         = pd.DataFrame(cursor.fetchall())
-    admin_list = []
-    admin_id   = df
-    if admin_id in admin_list:
-        return (admin_list)
-    else:
-        admin_list.append(admin_id)
-        return (admin_list)
 
 # Вывод имени всех валют
 def select_curr():
-    cursor = conn.cursor()
     cursor.execute("""select currency_name 
                         from currency""")
     all_currency = cursor.fetchall()
-    return (all_currency)
+    return all_currency
+
 
 # Добавить запись в таблицу currency
 def add_curr(currency_name, rate):
-    cursor = conn.cursor()
     cursor.execute("""insert into currency (currency_name, rate)
-                      values (%s, %s)""", (currency_name, rate, ))
+                      values (%s, %s)""",  (currency_name, rate,))
     conn.commit()
 
+
 # Обновление данных в таблице currency по имени валюты
-def update_function(currency_name,rate):
-    cursor = conn.cursor()
+def update_function(rate, currency_name):
     cursor.execute("""update currency
                          set rate = %s
-                       where currency_name = %s""", (rate, currency_name))
+                       where currency_name = %s""", (rate, currency_name,))
     conn.commit()
+
 
 # Удаление записей в таблице currency
 def delete_curr(currency_name):
-    cursor = conn.cursor()
     cursor.execute("""delete from currency
-                            where currency_name = %s""", (currency_name,))
+                       where currency_name = %s""", (currency_name,))
     conn.commit()
 
+
 # Вывод валют и их курсов
-def select_all_curr(currency_name, rate):
-    cursor = conn.cursor()
+def select_all_curr():
     cursor.execute("""select currency_name,
                              rate
-                        from currency""", (currency_name, rate,))
+                        from currency""")
     df = pd.DataFrame(cursor.fetchall(), columns = ['Валюта', 'Курс'])
-    return (df)
+    return df
+
 
 # Выбор курса из таблицы валют
 def select_rate_at_curr(currency_name):
-    cursor = conn.cursor()
     cursor.execute("""select rate 
                         from currency
                        where currency_name = %s""", (currency_name,))
-    df = pd.DataFrame(cursor.fetchone())
-    if df.empty == True:
-        ratee = []
-    else:
-        ratee = df.iloc[0][0]
-    return (ratee)
+    ratee = cursor.fetchone()
+    return ratee[0] if ratee else None
+
 
 class States(StatesGroup):
     next_convert   = State()
@@ -101,24 +90,25 @@ class States(StatesGroup):
     update_process = State()
     start_convert  = State()
 
-ADMIN_ID = get_from_admin()
+ADMIN_ID = str(get_from_admin())
 
 user_commands = [
-    types.BotCommand(command = "/start",          description="Начать"),
-    types.BotCommand(command = "/get_currencies", description="Вывод доступных вылют"),
-    types.BotCommand(command = "/convert",        description="Конвертация")
+    types.BotCommand(command = "/start",          description = "Начать"),
+    types.BotCommand(command = "/get_currencies", description = "Вывод доступных валют"),
+    types.BotCommand(command = "/convert",        description = "Конвертация")
 ]
+
 # Команды для админов
 admin_commands = [
-    types.BotCommand(command = "/start",           description="Начать"),
-    types.BotCommand(command = "/get_currencies",  description="Вывод доступных вылют"),
-    types.BotCommand(command = "/convert",         description="Конвертация"),
-    types.BotCommand(command = "/manage_currency", description="SuperUser command")
+    types.BotCommand(command="/start",           description = "Начать"),
+    types.BotCommand(command="/get_currencies",  description = "Вывод доступных валют"),
+    types.BotCommand(command="/convert",         description = "Конвертация"),
+    types.BotCommand(command="/manage_currency", description = "Управлять валютами")
 ]
 
 async def setup_bot_commands():
-    await bot.set_my_commands(user_commands, scope = BotCommandScopeDefault())
-    await bot.set_my_commands(admin_commands, scope = BotCommandScopeChat(chat_id = ADMIN_ID))
+    await bot.set_my_commands(user_commands, scope=BotCommandScopeDefault())
+    await bot.set_my_commands(admin_commands, scope=BotCommandScopeChat(chat_id=ADMIN_ID))
 
 
 # Функции команд
@@ -128,137 +118,138 @@ async def setup_bot_commands():
 async def start_name_process(message: types.Message):
     await message.answer("""Привет! Я бот для конвертации валюты. Для начала, выбери обозначение валюты с помощью действия ниже.
                             Вот какие команды я знаю:
-                            /manage_currency - Управлять валютами (Добавить валюту, Изменить валюту, Удалить валюту)
-                            /convert         - конвертировать валюту в рубль,
-                            /get_currencies  - посмотреть курсы валют""")
+                            Сначала   /manage_currency - Управлять валютами (Добавить валюту, Изменить валюту, Удалить валюту)
+                            Потом     /convert         - конвертировать валюту в рубль,
+                            И в конце /get_currencies  - посмотреть курсы валют""")
+
 
 # Конвертация валюты
 @dp.message_handler(commands = ['convert'])
 async def start_name_process(message: types.Message):
     await States.start_convert.set()
-    await message.answer("Введите название валюты (start_convert):")
+    await message.answer("Введите название валюты:")
 
 
-@dp.message_handler (state = States.start_convert)
+@dp.message_handler(state=States.start_convert)
 async def read_process(message: types.Message, state: FSMContext):
     currency = message.text
     await state.update_data(currency = currency)
-    await message.answer("Введите сумму в указанной валюте (next_convert):")
+    await message.answer("Введите сумму в указанной валюте:")
     await States.next_convert.set()
 
 
-@dp.message_handler (state = States.next_convert)
-async def convert_process (message: types.Message, state: FSMContext):
-    summ         = message.text
-    our_currency = await state.get_data()
-    rate         = select_rate_at_curr(our_currency['rate'])
-    result       = int(rate) * int(summ)
-    await message.reply("(next_convert finish)", result)
+@dp.message_handler(state=States.next_convert)
+async def convert_process(message: types.Message, state: FSMContext):
+    summ = message.text
+    data = await state.get_data()
+    rate = select_rate_at_curr(data['currency'])
+    if rate:
+        result = float(rate) * float(summ)
+        await message.reply(result)
+    else:
+        await message.reply("Неверно указана валюта.")
     await state.finish()
 
 
 # Все валюты
 @dp.message_handler(commands = ['get_currencies'])
 async def start_name_process(message: types.Message):
-
-    currency_name = message.text
-    rate = message.text
-    df = select_all_curr(currency_name, rate)
+    df = select_all_curr()
     await message.answer(df)
 
+
 # Команда администратора
-@dp.message_handler(commands = ['manage_currency'])
+@dp.message_handler(commands=['manage_currency'])
 async def start_name_process(message: types.Message):
     buttons = [
-        types.InlineKeyboardButton(text = 'Добавить валюту',      callback_data = 'add_curr_manage'),
-        types.InlineKeyboardButton(text = 'Удалить валюту',       callback_data = 'delete_curr_manage'),
-        types.InlineKeyboardButton(text = 'Изменить курс валюты', callback_data = 'update_curr_manage')
+        [
+            KeyboardButton(text = "Добавить валюту"),
+            KeyboardButton(text = "Удалить валюту"),
+            KeyboardButton(text = "Изменить курс валюты"),
+        ]
     ]
 
-    # Создание объекта класса InlineKeyboardMarkup с передачей списка кнопок в конструктор
-    keyboard = types.InlineKeyboardMarkup(row_width = 3)
-    keyboard.add(*buttons)
+    keyboard = ReplyKeyboardMarkup(
+        keyboard          = buttons,
+        resize_keyboard   = True,
+        one_time_keyboard = True
+    )
 
-   # if str(message.from_user.id) != ADMIN_ID:
-    #    await message.answer("У Вас нет доступа к команде! Вы обычный смертный пользователь))")
-    #else:
-    await message.answer("О, Вы Админ!", reply_markup = keyboard)
-    await States.start_manage.set()
+    if str(message.from_user.id) != ADMIN_ID:
+        await message.answer("У Вас нет доступа к команде! Вы обычный смертный пользователь.")
+    else:
+        await message.answer("О, Вы Админ!", reply_markup=keyboard)
+        await States.start_manage.set()
 
 
 # Удаление валюты
-@dp.message_handler(lambda c: c.data == 'delete_curr_manage',
-                    state = States.start_manage)
-async def delete_process (message: types.Message, state: FSMContext):
-    await message.answer("Введите название валюты: (start_manage to drop manage)")
+@dp.message_handler(lambda message: message.text == 'Удалить валюту', state = States.start_manage)
+async def delete_process(message: types.Message, state: FSMContext):
+    await message.answer("Введите название валюты:")
     await States.drop_manage.set()
 
-@dp.message_handler (state = States.drop_manage)
-async def delete_process (message: types.Message, state: FSMContext):
+
+@dp.message_handler(state = States.drop_manage)
+async def delete_process(message: types.Message, state: FSMContext):
     currency = message.text
-    await state.update_data(currency = str(currency))
+    await state.update_data(currency=currency)
     delete_curr(currency)
-    await message.answer("Валюта удалена! (drop manage finish)")
+    await message.answer("Валюта удалена! Для продолжения манипуляций с валютами нажми на /manage_currency")
     await state.finish()
 
 
 # Изменение курса валюты
-@dp.message_handler(lambda c: c.data == 'update_curr_manage',
-                    state = States.start_manage)
-async def update_currency_process (message: types.Message, state: FSMContext):
-    await message.answer("Введите название валюты: (update manage)")
+@dp.message_handler(lambda message: message.text == 'Изменить курс валюты', state = States.start_manage)
+async def update_currency_process(message: types.Message, state: FSMContext):
+    await message.answer("Введите название валюты:")
     await States.update_manage.set()
 
-@dp.message_handler (state = States.update_manage)
-async def update_process (message: types.Message, state: FSMContext):
+
+@dp.message_handler(state = States.update_manage)
+async def update_process(message: types.Message, state: FSMContext):
     currency = message.text
-    await state.update_data(currency=currency)
-    await message.answer("Введите курс валюты к рублю: (update process)")
+    await state.update_data(currency = currency)
+    await message.answer("Введите курс валюты к рублю:")
     await States.update_process.set()
 
-@dp.message_handler (state = States.update_process)
-async def update_process (message: types.Message, state: FSMContext):
+
+@dp.message_handler(state = States.update_process)
+async def update_process(message: types.Message, state: FSMContext):
     rate = message.text
-    await state.update_data(rate=rate)
-    currency = await state.get_data()
-    update_function(currency['currency'], rate)
-    await message.answer("Валюта изменена!")
+    data = await state.get_data()
+    update_function(rate, data['currency'])
+    await message.answer("Валюта изменена! Для продолжения манипуляций с валютами нажми на /manage_currency")
     await state.finish()
 
 
 # Добавление валюты
-@dp.message_handler(lambda c: c.data == 'add_curr_manage',
-                    state = States.start_manage)
-async def add_currency_process (message: types.Message, state: FSMContext):
-    await message.answer("Введите название валюты:")
-    await States.check.set()
-
-@dp.message_handler (state=States.check)
-async def check_process (message: types.Message, state: FSMContext):
-    currency = message.text
-    await state.update_data(currency = currency)
-    currencies = select_rate_at_curr(currency)
-    print(currencies)
-    if currencies==[]:
-        await message.answer("Введите курс к рублю:")
-        await States.add_state.set()
-    else:
-        await message.reply("Данная валюта уже существует!")
-
-@dp.message_handler (state = States.add_state)
+@dp.message_handler(lambda message: message.text == 'Добавить валюту', state = States.start_manage)
 async def add_currency_process(message: types.Message, state: FSMContext):
+    await message.answer("Введите название валюты:")
+    await States.add_state.set()
+
+
+@dp.message_handler(state=States.add_state)
+async def add_currency_process(message: types.Message, state: FSMContext):
+    currency = message.text
+    await state.update_data(currency=currency)
+    rate = select_rate_at_curr(currency)
+    if rate:
+        await message.answer("Данная валюта уже существует!")
+    else:
+        await message.answer("Введите курс к рублю:")
+        await States.check.set()
+
+
+@dp.message_handler(state=States.check)
+async def check_process(message: types.Message, state: FSMContext):
     rate = message.text
-
-    await state.update_data(rate = rate)
-
-    currency = await state.get_data()
-    add_curr(currency['currency'], rate)
-
-    await message.answer("Валюта: " + currency['currency'] + " успешно добавлена!")
-    await States.check.set()
+    data = await state.get_data()
+    add_curr(data['currency'], rate)
+    await message.answer("Валюта успешно добавлена! Для продолжения манипуляций с валютами нажми на /manage_currency")
     await state.finish()
 
-#точка входа в приложение
-if __name__ =='__main__':
-    logging.basicConfig(level = logging.INFO)
-    executor.start_polling(dp, skip_updates = True)
+
+# точка входа в приложение
+if __name__ == '__main__':
+    executor.start_polling(dp, skip_updates=True)
