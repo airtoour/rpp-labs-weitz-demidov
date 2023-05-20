@@ -108,7 +108,7 @@ obj4 = operate(decode_body4, obj3)
 conn.close()
 
 # Вывод результата работы функции operate()
-print("Вывод П.4: ", round(obj4))
+print("Вывод П.4: ", int(obj4))
 
 
 # Пункт 5
@@ -130,4 +130,4 @@ obj5 = operate(decoded_body5, obj4)
 conn.close()
 
 # Вывод результата работы функции operate()
-print("Вывод П.5: ", round(obj5))
+print("Вывод П.5: ", int(obj5))
