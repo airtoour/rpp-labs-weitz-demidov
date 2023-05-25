@@ -71,10 +71,10 @@ async def manage_comand(message: types.Message):
         await message.answer("У Вас нет доступа к команде! Вы обычный смертный пользователь.")
         await bot.set_my_commands(user_commands, scope = BotCommandScopeDefault())
     else:
-        await message.answer("О, Вы Админ!")
+        await message.answer("О, Вы Админ! Введите название конвертируемой валюты:")
         await bot.set_my_commands(admin_commands, scope = BotCommandScopeDefault())
 
-        await Form.start_manage.set()
+        await Form.save_base.set()
 
 
 # функция выполняемая по переходу на состояния
