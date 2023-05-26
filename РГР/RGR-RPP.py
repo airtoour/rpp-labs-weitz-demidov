@@ -11,7 +11,7 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
 API_KEY = "61HMKMI43NOMJFEO"
 TOKEN = "6165848339:AAE2sRqeBVZ7ss23Kw9J9zIx-0I7I5mWu5c"
-WAIT_TIME_SECONDS = 300
+WAIT_TIME_SECONDS = 86400
 
 ticker = threading.Event()
 
