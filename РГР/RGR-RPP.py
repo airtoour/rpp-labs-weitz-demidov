@@ -23,16 +23,18 @@ cursor = conn.cursor()
 
 class Form(StatesGroup):
     save = State()
+    show = State()
 
 
-ticker = threading.Event()
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
 
 # Раз в WAIT_TIME_SECONDS секунд пересчитываем показатели для всех бумаг
 def periodically_recalculate_stocks():
-    while not ticker.wait(WAIT_TIME_SECONDS):
+    ticker = threading.Event()
+    while not ticker.wait(1):
+        print("asd")
         recalculate_stocks()
 
 
@@ -59,20 +61,7 @@ async def add_stock_bd(user_id, stock_name):
         return f'Ценная бумага {stock_name} обновлена'
 
 
-def get_stocks_by_name(name):
-    cursor.execute(f"""SELECT stock_name, averages FROM stock WHERE stock_name = '{name}'""")
-    stocks = cursor.fetchall()
-    msg = ''
-    for stock_name, averages in stocks:
-        if averages == 'null':
-            msg += f'Для ценной бумаги {stock_name} не найдено значений\n\n'
-        else:
-            avg_values = eval(averages)
-            msg += f'Акция {stock_name} имеет среднее значение: {avg_values[0]}\n\n'
-    return msg
-
-
-async def recalculate_stocks():
+def recalculate_stocks():
     cursor.execute(f"""select * from stock """)
     stocks = cursor.fetchall()
     for _, user_id, stock_name, averages in stocks:
@@ -89,7 +78,9 @@ async def start_command(message: Message):
     keyboard.add(KeyboardButton('Добавить ценную бумагу к портфелю'))
     keyboard.add(KeyboardButton('Показатели отслеживаемых ценных бумаг'))
 
-    await message.answer(text='Привет, я Бот, который умеет работать с ценными бумагами. Нажми на кнопку на квлавиаутре!', reply_markup=keyboard)
+    await message.answer(
+        text='Привет, я Бот, который умеет работать с ценными бумагами. Нажми на кнопку на квлавиаутре!',
+        reply_markup=keyboard)
 
 
 @dp.message_handler(text='Добавить ценную бумагу к портфелю')
@@ -116,14 +107,24 @@ async def save_stock(message: Message, state: FSMContext):
 
 @dp.message_handler(content_types=types.ContentType.TEXT, text='Показатели отслеживаемых ценных бумаг')
 async def echo(message: Message):
-    if message.text:
-        msg = get_stocks_by_name(message.text)
-        if msg:
-            await message.answer(msg)
+    await message.answer("Введите название ценной бумаги:")
+    await Form.show.set()
+
+
+@dp.message_handler(state=Form.show)
+async def show_work(message: Message):
+    cursor.execute(f"""select stock_name,
+                              averages
+                         from stock
+                        where stock_name = '{message.text}'""")
+    stocks = cursor.fetchall()
+    for stock_name, averages in stocks:
+        if averages == 'null':
+            await message.answer(f'Для ценной бумаги {stock_name} не найдено значений')
         else:
-            await message.answer('Для данной ценной бумаги нет доступных показателей.')
-    else:
-        await message.answer('Пожалуйста, введите имя ценной бумаги.')
+            avg_values = eval(averages)
+            await message.answer(f'Акция {stock_name} имеет среднее значение: {avg_values[0]}')
+    await State.finish()
 
 
 def fetch_data(company_symbol):
@@ -193,5 +194,6 @@ def get_values_and_averages(company_symbol):
 
 
 if __name__ == '__main__':
+    thread = threading.Thread(target=periodically_recalculate_stocks)
+    thread.start()
     executor.start_polling(dp, skip_updates=True)
-    periodically_recalculate_stocks()
