@@ -1,6 +1,5 @@
 import requests
 import json
-import os
 import threading
 
 import psycopg2 as pg
@@ -12,7 +11,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher import FSMContext
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, Message
 
-ALPHAVANTAGE_API_KEY = '9OZBY4NHW13I3EK4'
+API_KEY = '9OZBY4NHW13I3EK4'
 # Токен бота
 API_TOKEN = '6165848339:AAE2sRqeBVZ7ss23Kw9J9zIx-0I7I5mWu5c'
 # Таймер для перерасчета показателей акций (24 часа)
@@ -39,93 +38,96 @@ def periodically_recalculate_stocks():
 
 async def add_stock_bd(user_id, stock_name):
     averages = get_values_and_averages(stock_name)
-    cursor.execute(
-        f"""SELECT * FROM stock
-        WHERE user_id = {user_id}
-        AND stock_name = '{stock_name}'"""
-    )
+    cursor.execute(f"""select *
+                         from stock
+                        where user_id    = {user_id}
+                          and stock_name = '{stock_name}'""")
     users = cursor.fetchall()
     if len(users) == 0:
-        cursor.execute(
-            f"""INSERT INTO stock (user_id, stock_name, averages)
-             VALUES ({user_id}, '{stock_name}', '{averages}')"""
-        )
+        cursor.execute(f"""insert into stock (user_id, stock_name, averages)
+                                values ({user_id}, '{stock_name}', '{averages}')""")
         conn.commit()
         return f'Ценная бумага {stock_name} добавлена к отслеживаемым'
     else:
         cursor.execute(
-            f"""UPDATE stock
-            SET averages = '{averages}'
-            WHERE user_id = {user_id}
-            AND stock_name = '{stock_name}'"""
+            f"""update stock
+                   set averages   = '{averages}'
+                 where user_id    = {user_id}
+                   and stock_name = '{stock_name}'"""
         )
         conn.commit()
         return f'Ценная бумага {stock_name} обновлена'
 
 
 def get_stocks_by_name(name):
-    cursor.execute(
-        f"""SELECT stock_name, entry, eject FROM stock
-        WHERE stock_name = '{name}'"""
-    )
+    cursor.execute(f"""SELECT stock_name, averages FROM stock WHERE stock_name = '{name}'""")
     stocks = cursor.fetchall()
     msg = ''
-    for stock_name, entry, eject in stocks:
-        if entry == 'null' or eject == 'null':
+    for stock_name, averages in stocks:
+        if averages == 'null':
             msg += f'Для ценной бумаги {stock_name} не найдено значений\n\n'
         else:
-            msg += f'Акция {stock_name} имеет\nоптимальную точку входа: {entry}\nоптимальную точку выхода: {eject}\n\n'
+            avg_values = eval(averages)
+            msg += f'Акция {stock_name} имеет среднее значение: {avg_values[0]}\n\n'
     return msg
 
 
 async def recalculate_stocks():
-    cursor.execute(
-        f"""SELECT * FROM stock """
-    )
+    cursor.execute(f"""select * from stock """)
     stocks = cursor.fetchall()
-    for _, user_id, stock_name, entry, eject in stocks:
+    for _, user_id, stock_name, averages in stocks:
         averages = get_values_and_averages(stock_name)
-        cursor.execute(
-            f"""UPDATE stock
-            SET averages = '{averages}'
-            WHERE user_id = {user_id} AND stock_name = '{stock_name}'"""
-        )
+        cursor.execute(f"""update stock
+                              set averages   = '{averages}'
+                            where user_id    = {user_id}
+                              and stock_name = '{stock_name}'""")
 
 
 @dp.message_handler(commands=['start'])
 async def start_command(message: Message):
-    kb = ReplyKeyboardMarkup(is_persistent=True, resize_keyboard=True, row_width=1)
-    kb.add(KeyboardButton('Добавить ценную бумагу к портфелю'))
-    kb.add(KeyboardButton('Показатели отслеживаемых ценных бумаг'))
+    keyboard = ReplyKeyboardMarkup(is_persistent=True, resize_keyboard=True, row_width=1)
+    keyboard.add(KeyboardButton('Добавить ценную бумагу к портфелю'))
+    keyboard.add(KeyboardButton('Показатели отслеживаемых ценных бумаг'))
 
-    await message.answer(text='Добро пожаловать в чат бот!', reply_markup=kb)
+    await message.answer(text='Привет, я Бот, который умеет работать с ценными бумагами. Нажми на кнопку на квлавиаутре!', reply_markup=keyboard)
 
 
 @dp.message_handler(text='Добавить ценную бумагу к портфелю')
 async def add_stock(message: Message):
-    await message.answer('Введите имя ценной бумаги')
+    await message.answer('Введите имя ценной бумаги:')
     await Form.save.set()
 
 
 @dp.message_handler(state=Form.save)
 async def save_stock(message: Message, state: FSMContext):
-    ide=message.from_id
-    print(ide)
-    test=message.text
-    print(test)
-    msg = await add_stock_bd(ide, test)
+    admin_id = message.from_id
+    cost_paper = message.text
+    msg = await add_stock_bd(admin_id, cost_paper)
     await message.answer(msg)
+
+    keyboard = ReplyKeyboardMarkup(is_persistent=True, resize_keyboard=True, row_width=1)
+    keyboard.add(KeyboardButton('Добавить ценную бумагу к портфелю'))
+    keyboard.add(KeyboardButton('Показатели отслеживаемых ценных бумаг'))
+
+    await message.answer(text='Выбери следующий метод:', reply_markup=keyboard)
+
     await state.finish()
 
 
-@dp.message_handler(text='Показатели отслеживаемых ценных бумаг')
+@dp.message_handler(content_types=types.ContentType.TEXT, text='Показатели отслеживаемых ценных бумаг')
 async def echo(message: Message):
-    msg = await get_stocks_by_name(message.text)
-    await message.answer(msg)
+    if message.text:
+        msg = get_stocks_by_name(message.text)
+        if msg:
+            await message.answer(msg)
+        else:
+            await message.answer('Для данной ценной бумаги нет доступных показателей.')
+    else:
+        await message.answer('Пожалуйста, введите имя ценной бумаги.')
 
 
 def fetch_data(company_symbol):
-    url = f"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol={company_symbol}&apikey={ALPHAVANTAGE_API_KEY}"
+    url = f"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol={company_symbol}&apikey={API_KEY}"
     response = requests.get(url)
     return json.loads(response.text)
 
@@ -137,15 +139,15 @@ def get_values_and_averages(company_symbol):
     if data.get('Error Message'):
         return 'null', 'null'
 
-    maximum_days = 30
+    max_cnt_days = 30
     # Длина периода для рассчета среднего
     n = 30
     # Сумма ценностей в текущий период
     total = 0
     # Счетчик дней в текущий период
-    days_period = 0
+    period_days = 0
     # Счетчик отступа дней от сегодня
-    day_offset = 0
+    skip_days = 0
     # Счетчик дней, для которых удалось получить данные
     days_counted = 0
     # Здесь храним значения по дням
@@ -155,10 +157,10 @@ def get_values_and_averages(company_symbol):
     # Здесь храним средние значения по периодам длиной n
     avgs = []
 
-    while days_counted < maximum_days:
-        day = (date.today() - timedelta(days=day_offset)).isoformat()
+    while days_counted < max_cnt_days:
+        day = (date.today() - timedelta(days=skip_days)).isoformat()
         day_info = data['Time Series (Daily)'].get(day)
-        day_offset += 1
+        skip_days = skip_days + 1
 
         # Пропускаем день, если по нему нет данных
         if day_info is None:
@@ -169,20 +171,20 @@ def get_values_and_averages(company_symbol):
         # Достаем значение ценности бумаги
         val = float(day_info['4. close'])
         vals.append(val)
-        total += val
-        days_period += 1
+        total = total + val
+        period_days = period_days + 1
 
         # Если до текущего момента была подсчитана сумма по следующим 30 дням,
         # добавляем среднее значение в массив avg и обнуляем соответствующие переменные
-        if days_period == n:
+        if period_days == n:
             avg = round(total / n, 2)
             avgs.append(avg)
-            days_period = 0
+            period_days = 0
             total = 0
 
-        days_counted += 1
+        days_counted = days_counted + 1
 
-    # Переворачиваем массивы, так как заполняли их от текущей даты к прошлой
+    # Разворачиваем массивы, для корректности
     vals.reverse()
     avgs.reverse()
     dates.reverse()
