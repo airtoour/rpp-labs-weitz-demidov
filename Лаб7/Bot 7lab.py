@@ -99,23 +99,23 @@ async def save_converted(message: types.Message, state: FSMContext):
 
 # функция выполняемая по переходу на состояния
 @dp.message_handler(state=Form.save_converted_rate)
-async def save_converted(message: types.Message, state: FSMContext):
-    data = await state.get_data()  # записывает в переменню данные из состояния
-    code_ = data['code']  # записывает в переменню полученные данные названия конвертируемых валют по ключу
+async def save_converted_rate(message: types.Message, state: FSMContext):
+    data = await state.get_data()  # получаем данные из состояния
+    code_ = data['code']  # получаем название конвертируемой валюты
     try:
-        rates_ = data['rates']  # записывает в переменню полученные данные курса конвертируемых валют по ключу
-    except:
+        rates_ = data['rates']  # получаем список курсов валют
+    except KeyError:
         rates_ = []
-    rates_.append({'code': code_, 'rate': float(message.text)})  # записывает в словарь полученные данные
-    # конвертируемой валюты по ключам
-    await state.update_data(rates=rates_)  # Сохраняет в память состояния название и курс валют для конвертации
+    rates_.append({'code': code_, 'rate': float(message.text)})  # добавляем новый курс валюты в список
+    data['rates'] = rates_  # обновляем значение 'rates' в словаре data
+    await state.set_data(data)  # сохраняем обновленные данные в состоянии
     await Form.save.set()
-    await message.reply("Добавить еще валюту, в которую может сконвертирована основная валюта. Введите 'Да' или 'Нет'!")
+    await message.reply("Добавить еще валюту, в которую может сконвертирована основная валюта? Введите 'Да' или 'Нет'!")
 
 
 # функция выполняемая по переходу на состояния
 @dp.message_handler(state=Form.save)
-async def save_converted(message: types.Message, state: FSMContext):
+async def save_converted_finish(message: types.Message, state: FSMContext):
     cur = await state.get_data()  # записывает в переменню данные из состояния
     check = message.text  # записывает в переменню данные из сообщения
     i = "Да"
@@ -134,7 +134,7 @@ async def save_converted(message: types.Message, state: FSMContext):
 
 # функция выполняемая по команде из бота, предназначенная для конвертации валют
 @dp.message_handler(commands=['convert'])
-async def convert_comand(message: types.Message):
+async def convert_command(message: types.Message):
     await Form.check.set()
     await message.reply("Введите название валюты для конвертации:")
 
@@ -150,8 +150,7 @@ async def process_check(message: types.Message, state: FSMContext):
 # функция выполняемая по переходу на состояния
 @dp.message_handler(state=Form.num)
 async def process_convert(message: types.Message, state: FSMContext):
-    await state.update_data(convertedCurrency=message.text)  # Сохраняет в память состояния название валюты для
-    # конвертации
+    await state.update_data(convertedCurrency=message.text)  # Сохраняет в память состояния название валюты для конвертации
     await Form.con.set()
     await message.reply("Введите сумму для конвертации:")
 
@@ -159,24 +158,22 @@ async def process_convert(message: types.Message, state: FSMContext):
 # функция выполняемая по переходу на состояния
 @dp.message_handler(state=Form.con)
 async def process_convert2(message: types.Message, state: FSMContext):
-    num = message.text  # Сохраняет в переменную сумму для конвертации
-    cur = await state.get_data()  # записывает в переменню данные из состояния
-    param["baseCurrency"] = str(cur["baseCurrency"])  # записываем в словарь название основной влюты по ключа
-    param["convertedCurrency"] = str(cur["convertedCurrency"])  # записываем в словарь название влюты для конвертации
-    # по ключа
-    param["sum"] = str(num)  # записываем в словарь сумму для конвертации
-    result = requests.get("http://localhost:10609/convert", params=param)  # отправляем запрос с данными в микросервис
-    if result == "<Response [500]>":  # При получении ошибки из микросервиса выполняется следующее
+    num = message.text
+    cur = await state.get_data()
+    param["baseCurrency"] = str(cur["baseCurrency"])
+    param["convertedCurrency"] = str(cur["convertedCurrency"])
+    param["sum"] = str(num)
+
+    result = requests.get("http://localhost:10609/convert", json=param)
+    if result.status_code == 500:
         await message.reply('Произошла ошибка при конвертации валюты :(')
         param.clear()
         await state.finish()
-    else:  # При успешном выполнении микросервиса
-        res = result.text  # Записываемрезультат выполнения микросервиса в переменную
-        res = str(re.sub(r"[^0-9.]", r"", res))  # убираем лишние сиволы
-        await message.reply(f'Результат конвертации: {res}')  # Отправляем результат в бота
+    else:
+        res = result.json()
+        await message.reply(f'Результат конвертации: {res}')
         param.clear()
         await state.finish()
-
 
 # точка входа в приложение
 if __name__ == '__main__':

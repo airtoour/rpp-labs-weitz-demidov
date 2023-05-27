@@ -42,7 +42,7 @@ def get(name, id):
 
 
 @app.get("/convert")
-def convert_get(baseCurrency: str, convertedCurrency: str, amount: float):
+def convert_get(baseCurrency: str, convertedCurrency: str, amount: str):
     try:
         baseCurrencyId = check(baseCurrency)
         if baseCurrencyId is None:
