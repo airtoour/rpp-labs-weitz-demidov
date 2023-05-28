@@ -3,14 +3,14 @@ import psycopg2 as pg
 import re
 
 from fastapi import FastAPI, HTTPException
- 
+
 app = FastAPI()  # Подключение метода для общения микросервиса по запросам
 
-conn = pg.connect(user     = 'postgres',
-                  password = 'postgres',
-                  host     = 'localhost',
-                  port     = '5432',
-                  database = 'lab7rpp')
+conn = pg.connect(user='postgres',
+                  password='postgres',
+                  host='localhost',
+                  port='5432',
+                  database='lab7rpp')
 cursor = conn.cursor()
 
 
@@ -42,22 +42,22 @@ def get(name, id):
 
 
 @app.get("/convert")
-def convert_get(baseCurrency: str, convertedCurrency: str, amount: float):
+def convert_get(baseCurrency: str, convertedCurrency: str, amount: str):
     try:
         baseCurrencyId = check(baseCurrency)
         if baseCurrencyId is None:
-            raise HTTPException(status_code = 404, detail = "Base currency not found")
+            raise HTTPException(status_code=404, detail="Base currency not found")
 
         convertedCurrencyRate = get(convertedCurrency, baseCurrencyId)
         if convertedCurrencyRate is None:
-            raise HTTPException(status_code = 404, detail = "Converted currency not found")
+            raise HTTPException(status_code=404, detail="Converted currency not found")
 
         convertedAmount = convertedCurrencyRate * amount
         return {'converted': convertedAmount}
     except Exception as e:
         print(e)
-        raise HTTPException(status_code = 500)
+        raise HTTPException(status_code=500)
 
 
 if __name__ == '__main__':
-    uvicorn.run(app, port = 10609, host = 'localhost')
+    uvicorn.run(app, port=10609, host='localhost')
