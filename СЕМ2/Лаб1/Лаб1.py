@@ -56,12 +56,10 @@ def add_region():
         result, status_code = select_region(id)
         result, status_code = insert_region(id, name)
 
-        if status_code != 200:
-            return result, status_code
-
         return result, status_code
     except Exception:
-        return error_body, 400
+        if status_code != 200:
+            return result, status_code
 
 
 # Задание 2:
@@ -130,60 +128,90 @@ def add_tax_param():
         return error_body, 401
 
 # Задание 3
-    # 
+    # Функция ппроверок и инсертов
+def select_insert_auto(city_id, horse_power, production_year, name):
+    cur.execute("select * from region where id = %s", (city_id))
+    region_exist = cur.fetchone()
+
+    try:
+        if region_exist:
+            cur.execute("""select id
+                            from tax_param
+                            where from_hp_car              <= %s
+                            and to_hp_car                >= %s
+                            and from_production_year_car <= %s
+                            and to_production_year_car   >= %s""",
+                        (horse_power, horse_power, production_year, production_year,)
+                        )
+            tax_exist = cur.fetchone()
+
+            if tax_exist:
+                # Если такой налог существует, селектии нужные данные и считаем сумму налога
+                tax_id = int(tax_exist[0])
+                cur.execute("select rate from tax_param where id = %s", (tax_id,))
+
+                rate   = int(cur.fetchone()[0])
+                tax    = rate * int(horse_power)
+
+                # Инсертим данные в бд
+                cur.execute("""insert into auto(city_id, tax_id, name, horse_power, production_year, tax) 
+                                    values(%s,%s,%s,%s,%s,%s)""",
+                            (city_id, tax_id, name, horse_power, production_year, tax)
+                            )
+                conn.commit()
+                message_body = {'message': 'Сработало!'}
+                return message_body, 202
+            else:
+                error_body = {'reason': 'Ошибка при работе функции!'}
+                return error_body, 402
+        else:
+            error_body = {'reason': 'no_data_found'}
+            return error_body, 404
+    except Exception:
+        error_body = {'reason': 'Техническая ошибка при работе функции!'}
+        return error_body, 402
+
     # Эндпоинт для добавления автомобиля
 @app.route('/v1/add/auto', methods = ['POST'])
 def add_auto():
-    # вытаскиваем данные из запроса
-    req             = request.get_json()
-    city_id         = req['city_id']
-    name            = req['name']
-    horse_power     = req['horse_power']
-    production_year = req['production_year']
+    try:
+        # вытаскиваем данные из запроса
+        req             = request.get_json()
+        city_id         = req['city_id']
+        name            = req['name']
+        horse_power     = req['horse_power']
+        production_year = req['production_year']
 
-    cur.execute("select * from region where id = %s", (city_id,))
-    region_exist = cur.fetchone()
+        result, status_code = select_insert_auto(city_id, horse_power, production_year, name)
 
-    if region_exist:
-        cur.execute("""select id
-                         from tax_param
-                        where from_hp_car              <= %s
-                          and to_hp_car                >= %s
-                          and from_production_year_car <= %s
-                          and to_production_year_car   >= %s""",
-                    (horse_power, horse_power, production_year, production_year,)
-                    )
-        tax_exist = cur.fetchone()
+        return result, status_code
+    except Exception:
+        if status_code != 202:
+            return result, status_code
 
-        if tax_exist:
-            # Если такой налог существует, селектии нужные данные и считаем сумму налога
-            tax_id = int(tax_exist[0])
-            cur.execute("select rate from tax_param where id = %s", (tax_id,))
+# Задание 4
+    # Функция селекта из auto
+def select_auto(id):
+    try:
+        cur.execute("select * from auto where id = %s", (int(id),))
+        cur.fetchone()
 
-            rate   = int(cur.fetchone()[0])
-            tax    = rate * int(horse_power)
+        message_body = {'message': 'Запись найдена!'}
+        return message_body, 200
+    except Exception:
+        error_body = {'reason': 'no_data_found'}
+        return error_body, 404
 
-            # Инсертим данные в бд
-            cur.execute(
-                """insert into auto(city_id, tax_id, name, horse_power, production_year, tax) 
-                         values(%s,%s,%s,%s,%s,%s)""",
-                (city_id, tax_id, name, horse_power, production_year, tax))
-            conn.commit()
-            return "200"
-        else:
-            return '400 BAD REQUEST'
-    else:
-        return '400 BAD REQUEST'
-
-
-# Задание 4 endpoint получения информации по всем автомобилям
+    # Эндпоинт получения информации по всем автомобилям
 @app.route('/v1/auto/<id>', methods=['GET'])
 def auto(id):
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM auto WHERE id=(%s)", (int(id),))
-    auto = cur.fetchone()
-    message = {"Auto": f"{auto}"}
-#################
+    try:
+        auto = select_auto(id)
+        message_body = {"Auto": f"{auto}"}
+        return message_body, 200
+    except Exception:
+        error_body = {'reason': 'Ошибка!'}
+        return error_body, 400
 
 
 if __name__ == '__main__':
