@@ -58,52 +58,55 @@ def add_region():
 
         return result, status_code
     except Exception:
-        if status_code != 200:
-            return result, status_code
+        return result, status_code
 
 
 # Задание 2:
-    # Функция проверки наличия записи с заданным идентификатором записи в таблице tax_param
-def select_tax_param(city_id, from_hp_car, to_hp_car, from_production_year_car, to_production_year_car, rate):
+    # Функция выборки всей таблицы tax_param
+def select_full_tax_param(id):
     try:
-        cur.execute("""select exists(select false
-                                       from tax_param
-                                      where city_id                  = %s
-                                        and from_hp_car              = %s
-                                        and to_hp_car                = %s
-                                        and from_production_year_car = %s
-                                        and to_production_year_car   = %s
-                                        and rate                     = %s)""",
-                    (city_id, from_hp_car, to_hp_car, from_production_year_car, to_production_year_car, rate)
-                    )
-        existing_tax_param = cur.fetchone()
-        message_body = {'message': 'Все хорошо! ДУблей не найдено в таблице tax_param!'}
-        return message_body, 201
-    except Exception:
-        error_body = {'reason': 'Ошибка! Запись нашлась!'}
-        if not existing_tax_param:
-            return error_body, 401
+        cur.execute("select * from tax_param where id = %s", (id,))
+        cur.fetchone()
 
-    # Функция вставки новой записи в таблицу tax_param
-def insert_tax_param(city_id, from_hp_car, to_hp_car, from_production_year_car, to_production_year_car, rate):
-    try:
-        cur.execute("""insert into tax_param(city_id, from_hp_car, to_hp_car, from_production_year_car,
-                                             to_production_year_car, rate)
-                            values (%s, %s, %s, %s, %s, %s)""",
-                    (city_id, from_hp_car, to_hp_car, from_production_year_car, to_production_year_car, rate)
-                    )
-        conn.commit()
-        conn.close()
-        message_body = {'message': 'Запись с id региона успешно добавлена в таблицу region!'}
-        return message_body, 201
+        message_body = {'message': 'Таблица готова к использованию!'}
+
+        return message_body, 200
     except Exception:
-        error_body = {'reason': 'Запись с таким регионом уже существует в таблице region!'}
-        return error_body, 401
+        error_body = {'reason': 'Таблица пуста или неправильные вводные данные :('}
+        return error_body, 404
+
+    # Функция проверки наличия записи с заданным идентификатором записи в таблице tax_param
+def select_insert_tax_param(id, city_id, from_hp_car, to_hp_car, from_production_year_car, to_production_year_car, rate):
+    try:
+        result, status_code = select_region(city_id)
+        result2, status_code2 = select_full_tax_param(id)
+
+        if status_code and status_code2 != 200:
+            cur.execute("""insert into tax_param(id, city_id, from_hp_car, to_hp_car, from_production_year_car, to_production_year_car, rate)
+                                 values(%s,%s,%s,%s,%s,%s,%s)""",
+                        (id, city_id, from_hp_car, to_hp_car, from_production_year_car, to_production_year_car, rate)
+                        )
+            conn.commit()
+
+            message_body = {'message': 'Запись успешно добавлена в таблицу!'}
+            return message_body, 200
+        else:
+            error_body = {'reason': 'Информация не найлена, или произошла техническая ошибка!'}
+            return error_body, 404
+        
+        return result and result2, 200
+    except Exception:
+        if status_code or status_code2 != 200:
+            return result, status_code
 
     # Эндпоинт для добавления объекта налогообложения
 @app.route('/v1/add/tax-param', methods = ['POST'])
 def add_tax_param():
     try:
+        if 'id' not in request.json or 'city_id' not in request.json or 'from_hp_car' not in request.json or 'to_hp_car' not in request.json or 'from_production_year_car' not in request.json or 'to_production_year_car' not in request.json or 'rate' not in request.json:
+            error_body = {'reason': 'Одно/несколько поле(й) пуст(ы)'}
+            return error_body, 400
+
         # Извлекаем данные из тела запроса
         req                      = request.json
         city_id                  = req['city_id']
@@ -115,9 +118,7 @@ def add_tax_param():
 
         # Выполняем вышенаписанный функционал
         result, status_code = select_region(id)
-        result, status_code = select_tax_param(city_id, from_hp_car, to_hp_car, from_production_year_car,
-                                               to_production_year_car, rate)
-        result, status_code = insert_tax_param(city_id, from_hp_car, to_hp_car, from_production_year_car,
+        result, status_code = select_insert_tax_param(city_id, from_hp_car, to_hp_car, from_production_year_car,
                                                to_production_year_car, rate)
 
         if status_code != 201:
@@ -136,11 +137,11 @@ def select_insert_auto(city_id, horse_power, production_year, name):
     try:
         if region_exist:
             cur.execute("""select id
-                            from tax_param
+                             from tax_param
                             where from_hp_car              <= %s
-                            and to_hp_car                >= %s
-                            and from_production_year_car <= %s
-                            and to_production_year_car   >= %s""",
+                              and to_hp_car                >= %s
+                              and from_production_year_car <= %s
+                              and to_production_year_car   >= %s""",
                         (horse_power, horse_power, production_year, production_year,)
                         )
             tax_exist = cur.fetchone()
