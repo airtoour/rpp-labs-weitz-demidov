@@ -1,24 +1,24 @@
-CREATE TABLE IF NOT EXISTS region(
-  id   INT     PRIMARY KEY NOT NULL,
-  name VARCHAR             NOT NULL
+create table if not exists region(
+  id   int     primary key not null,
+  name varchar             not null
 );
 
-CREATE TABLE IF NOT EXISTS tax_param(
-  id                       SERIAL PRIMARY KEY           NOT NULL,
-  city_id                  INT 	  REFERENCES region(id) NOT NULL,
-  from_hp_car              INT                          NOT NULL,
-  to_hp_car                INT                          NOT NULL,
-  from_production_year_car INT                          NOT NULL,
-  to_production_year_car   INT                          NOT NULL,
-  rate                     NUMERIC                      NOT NULL
+create table if not exists tax_param(
+  id                       serial primary key           not null,
+  city_id                  int 	  references region(id) not null,
+  from_hp_car              int                          not null,
+  to_hp_car                int                          not null,
+  from_production_year_car int                          not null,
+  to_production_year_car   int                          not null,
+  rate                     numeric                      not null
 );
 
-CREATE TABLE IF NOT EXISTS auto(
-  id              SERIAL  PRIMARY KEY              NOT NULL,
-  city_id         INT     REFERENCES region(id) 	 NOT NULL,
-  tax_id          INT     REFERENCES tax_param(id) NOT NULL,
-  name            VARCHAR                          NOT NULL,
-  horse_power     INT                              NOT NULL,
-  production_year INT                              NOT NULL,
-  tax             NUMERIC                          NOT NULL
+create table if not exists auto(
+  id              serial  primary key              not null,
+  city_id         int     references region(id) 	 not null,
+  tax_id          int     references tax_param(id) not null,
+  name            varchar                          not null,
+  horse_power     int                              not null,
+  production_year int                              not null,
+  tax             numeric                          not null
 );

@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 # Функция для установления соединения с базой данных
 
-conn = pg.connect(dbname   = "SEM1Lab",
+conn = pg.connect(dbname   = "S2LR1",
                   user     = "postgres",
                   password = "postgres",
                   host     = "localhost",
