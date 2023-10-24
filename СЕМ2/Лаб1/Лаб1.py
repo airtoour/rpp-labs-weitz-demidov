@@ -1,218 +1,143 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 import psycopg2 as pg
 
 app = Flask(__name__)
 
 # Функция для установления соединения с базой данных
-
 conn = pg.connect(dbname   = "S2LR1",
                   user     = "postgres",
                   password = "postgres",
                   host     = "localhost",
                   port     = "5433"
-)
+                  )
 cur = conn.cursor()
 
-message_body = {}
-error_body   = {}
 
 # Задание 1:
-    # Функция проверки наличия записи с заданным кодом региона
-def select_region(id):
-    try:
-        cur.execute("select * from region where id = %s", (id,))
-        existing_region = cur.fetchone()
-        message_body = {'message': 'Запись найдена в таблице region!'}
-        return message_body, 200
-
-    except Exception:
-        error_body = {'reason': 'Запись с таким регионом не найдена!'}
-        if not existing_region:
-            return error_body, 400
-
-    # Функция вставки новой записи в таблицу region
-def insert_region(id, name):
-    try:
-        cur.execute("""insert into region(id, name)
-                            values (%s, %s)""", (id, name))
-        conn.commit()
-        conn.close()
-        message_body = {'message': 'Запись с id региона успешно добавлена в таблицу region!'}
-        return message_body, 200
-    except Exception:
-        error_body = {'reason': 'Запись с таким регионом уже существует в таблице region!'}
-        return error_body, 400
-
-    # Эндпоинт для добавления информации о регионе
-@app.route('/v1/add/region', methods = ['POST'])
+# Эндпоинт для добавления информации о регионе
+@app.route('/v1/add/region', methods=['POST'])
 def add_region():
-    try:
-        # Извлекаем данные из тела запроса
-        req  = request.json
-        id   = req['id']
-        name = req['name']
+    # Извлекаем данные из тела запроса
+    req       = request.json
+    city_id   = req['id']
+    city_name = req['name']
 
-        # Выполняем вышенаписанный функционал
-        result, status_code = select_region(id)
-        result, status_code = insert_region(id, name)
+    # Проверяем данные на наличие в таблице region
+    cur.execute("select * from region where id = %s", (city_id,))
+    region_exists = cur.fetchone()
 
-        return result, status_code
-    except Exception:
-        return result, status_code
+    if region_exists:
+        return jsonify({"message": f"id региона: ' {city_id} '  уже существует в таблице region!"}), 400
+    else:
+        try:
+            # Инсёртим данные в таблицу region
+            cur.execute("insert into region(id, name) values (%s, %s)", (city_id, city_name))
+            conn.commit()
+            conn.close()
+
+            return jsonify({"message": f"Запись с id региона: {city_id} успешно добавлена в таблицу region!"}), 200
+        except Exception:
+            return jsonify({"message": f"Запись с id региона: {city_id} уже существует в таблице region!"}), 400
+
 
 
 # Задание 2:
-    # Функция выборки всей таблицы tax_param
-def select_full_tax_param(id):
-    try:
-        cur.execute("select * from tax_param where id = %s", (id,))
-        cur.fetchone()
-
-        message_body = {'message': 'Таблица готова к использованию!'}
-
-        return message_body, 200
-    except Exception:
-        error_body = {'reason': 'Таблица пуста или неправильные вводные данные :('}
-        return error_body, 404
-
-    # Функция проверки наличия записи с заданным идентификатором записи в таблице tax_param
-def select_insert_tax_param(id, city_id, from_hp_car, to_hp_car, from_production_year_car, to_production_year_car, rate):
-    try:
-        result, status_code = select_region(city_id)
-        result2, status_code2 = select_full_tax_param(id)
-
-        if status_code and status_code2 != 200:
-            cur.execute("""insert into tax_param(id, city_id, from_hp_car, to_hp_car, from_production_year_car, to_production_year_car, rate)
-                                 values(%s,%s,%s,%s,%s,%s,%s)""",
-                        (id, city_id, from_hp_car, to_hp_car, from_production_year_car, to_production_year_car, rate)
-                        )
-            conn.commit()
-
-            message_body = {'message': 'Запись успешно добавлена в таблицу!'}
-            return message_body, 200
-        else:
-            error_body = {'reason': 'Информация не найлена, или произошла техническая ошибка!'}
-            return error_body, 404
-        
-        return result and result2, 200
-    except Exception:
-        if status_code or status_code2 != 200:
-            return result, status_code
-
-    # Эндпоинт для добавления объекта налогообложения
+# Эндпоинт для добавления объекта налогообложения
 @app.route('/v1/add/tax-param', methods = ['POST'])
 def add_tax_param():
-    try:
-        if 'id' not in request.json or 'city_id' not in request.json or 'from_hp_car' not in request.json or 'to_hp_car' not in request.json or 'from_production_year_car' not in request.json or 'to_production_year_car' not in request.json or 'rate' not in request.json:
-            error_body = {'reason': 'Одно/несколько поле(й) пуст(ы)'}
-            return error_body, 400
+    # Извлекаем данные из тела запроса
+    req                      = request.json
+    id_city                  = req['city_id']
+    from_hp_car              = req['from_hp_car']
+    to_hp_car                = req['to_hp_car']
+    from_production_year_car = req['from_production_year_car']
+    to_production_year_car   = req['to_production_year_car']
+    rate_amount              = req['rate']
 
-        # Извлекаем данные из тела запроса
-        req                      = request.json
-        city_id                  = req['city_id']
-        from_hp_car              = req['from_hp_car']
-        to_hp_car                = req['to_hp_car']
-        from_production_year_car = req['from_production_year_car']
-        to_production_year_car   = req['to_production_year_car']
-        rate                     = req['rate']
+    # Проверяем данные на наличие в таблице tax_param
+    cur.execute("select * from tax_param where city_id = %s", (id_city,))
+    tax_exists = cur.fetchone()
 
-        # Выполняем вышенаписанный функционал
-        result, status_code = select_region(id)
-        result, status_code = select_insert_tax_param(city_id, from_hp_car, to_hp_car, from_production_year_car,
-                                               to_production_year_car, rate)
+    if not tax_exists:
+        return jsonify({"message": "Таблица пуста или неправильные вводные данные :("}), 400
 
-        if status_code != 201:
-            return result, status_code
+    # Проверяем данные на наличие в таблице region
+    cur.execute("select * from region where id = %s", (id_city,))
+    region_exists = cur.fetchone()
 
-        return result, status_code
-    except Exception:
-        return error_body, 401
+    if region_exists:
+        return jsonify({"message": f"id региона: ' {id_city} ' уже существует в таблице region!"}), 400
+
+    if not tax_exists or not region_exists:
+        cur.execute("""insert into tax_param(city_id, from_hp_car, to_hp_car, from_production_year_car,
+                                             to_production_year_car, rate)
+                             values(%s, %s, %s, %s, %s, %s)""",
+                    (id_city, from_hp_car, to_hp_car,
+                     from_production_year_car, to_production_year_car, rate_amount)
+                    )
+        conn.commit()
+
+        return jsonify({"message": "Запись успешно добавлена в таблицу!"}), 200
+    else:
+        return jsonify({"message": "Информация не найдена, или произошла техническая ошибка!"}), 400
+
 
 # Задание 3
-    # Функция ппроверок и инсертов
-def select_insert_auto(city_id, horse_power, production_year, name):
-    cur.execute("select * from region where id = %s", (city_id))
-    region_exist = cur.fetchone()
-
-    try:
-        if region_exist:
-            cur.execute("""select id
-                             from tax_param
-                            where from_hp_car              <= %s
-                              and to_hp_car                >= %s
-                              and from_production_year_car <= %s
-                              and to_production_year_car   >= %s""",
-                        (horse_power, horse_power, production_year, production_year,)
-                        )
-            tax_exist = cur.fetchone()
-
-            if tax_exist:
-                # Если такой налог существует, селектии нужные данные и считаем сумму налога
-                tax_id = int(tax_exist[0])
-                cur.execute("select rate from tax_param where id = %s", (tax_id,))
-
-                rate   = int(cur.fetchone()[0])
-                tax    = rate * int(horse_power)
-
-                # Инсертим данные в бд
-                cur.execute("""insert into auto(city_id, tax_id, name, horse_power, production_year, tax) 
-                                    values(%s,%s,%s,%s,%s,%s)""",
-                            (city_id, tax_id, name, horse_power, production_year, tax)
-                            )
-                conn.commit()
-                message_body = {'message': 'Сработало!'}
-                return message_body, 202
-            else:
-                error_body = {'reason': 'Ошибка при работе функции!'}
-                return error_body, 402
-        else:
-            error_body = {'reason': 'no_data_found'}
-            return error_body, 404
-    except Exception:
-        error_body = {'reason': 'Техническая ошибка при работе функции!'}
-        return error_body, 402
-
-    # Эндпоинт для добавления автомобиля
-@app.route('/v1/add/auto', methods = ['POST'])
+# Эндпоинт для добавления автомобиля
+@app.route('/v1/add/auto', methods=['POST'])
 def add_auto():
-    try:
-        # вытаскиваем данные из запроса
-        req             = request.get_json()
-        city_id         = req['city_id']
-        name            = req['name']
-        horse_power     = req['horse_power']
-        production_year = req['production_year']
+    body            = request.get_json()
+    obj_id          = body['id']
+    city_id         = body['city_code']
+    tax_id          = body['tax_id']
+    name            = body['name']
+    horse_power     = body['horse_power']
+    production_year = body['production_year']
 
-        result, status_code = select_insert_auto(city_id, horse_power, production_year, name)
+    # Проверяем данные на наличие в таблице region
+    cur.execute("select * from region where id = %s", (city_id,))
+    region_exists = cur.fetchone()
 
-        return result, status_code
-    except Exception:
-        if status_code != 202:
-            return result, status_code
+    if region_exists:
+        return jsonify({"message": "с id региона: {city_id} уже существует в таблице region!"}), 400
+
+    # Проверка наличия налогообложения
+    cur.execute("select * from tax_param where id = %s", (tax_id,))
+    tax_exists = cur.fetchone()
+
+    if not tax_exists:
+        return jsonify(
+            {"message": f"Налогообложение для автомобиля с {horse_power} л.с. в {production_year} году не найдено"}
+        ), 400
+
+    # Вычисление налога
+    tax = horse_power * tax_exists[6]
+
+    # Сохранение данных в таблицу auto
+    cur.execute("""insert into auto(id, city_code, tax_id, name, horse_power, production_year, tax)
+                            values (%s, %s, %s,%s, %s, %s, %s)""", (obj_id, city_id, tax_id, name, horse_power,
+                                                                    production_year, tax))
+    conn.commit()
+    return jsonify({"message": "Автомобиль успешно добавлен"}), 200
+
 
 # Задание 4
-    # Функция селекта из auto
-def select_auto(id):
+# Эндпоинт получения информации по всем автомобилям
+@app.route('/v1/auto/<id>', methods = ['GET'])
+def auto(auto_id):
     try:
-        cur.execute("select * from auto where id = %s", (int(id),))
-        cur.fetchone()
+        cur.execute("select * from auto where id = %s", (int(auto_id),))
+        auto_data = cur.fetchone()
 
-        message_body = {'message': 'Запись найдена!'}
-        return message_body, 200
+        return jsonify({"message": f"{auto_data}"}), 200
     except Exception:
-        error_body = {'reason': 'no_data_found'}
-        return error_body, 404
+        return jsonify({"message": "no_data_found"}), 400
 
-    # Эндпоинт получения информации по всем автомобилям
-@app.route('/v1/auto/<id>', methods=['GET'])
-def auto(id):
-    try:
-        auto = select_auto(id)
-        message_body = {"Auto": f"{auto}"}
-        return message_body, 200
-    except Exception:
-        error_body = {'reason': 'Ошибка!'}
-        return error_body, 400
+
+# Обработчик запроса на главную страницу
+@app.route('/')
+def home():
+    return 'Главная страница!'
 
 
 if __name__ == '__main__':
