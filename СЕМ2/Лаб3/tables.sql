@@ -1,6 +1,6 @@
 create table region(
-    id   serial  primary key not null,                              -- Код региона
-    name varchar             not null                               -- Название региона
+    id   serial  primary key                               not null, -- Код региона
+    name varchar                                           not null  -- Название региона
 );
 
 create table car_tax_param(
@@ -14,7 +14,7 @@ create table car_tax_param(
 );
 
 create table area_tax_param(
-    id       serial  primary key                        not null,    -- id записи
-    city_id  integer references region(id)              not null,    -- Код региона
-    tax_rate numeric                                    not null     -- Налоговая ставка
+    id       serial  primary key                           not null, -- id записи
+    city_id  integer references region(id)                 not null, -- Код региона
+    tax_rate numeric                                       not null  -- Налоговая ставка
 );
