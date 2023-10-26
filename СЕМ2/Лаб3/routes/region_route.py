@@ -1,119 +1,78 @@
-from flask import Blueprint, request
-from Config import db
+from flask  import Blueprint, request, jsonify
+from config import database
+from models import Region, CarTaxParam, AreaTaxParam
 
-regions = Blueprint('regions',__name__)
-
-
-class Region(db.Model):
-    id = db.Column(db.Serial, primary_key=True)
-    name = db.Column(db.String(200), nullable=False)
-
-    def getData(self):
-        return f'<Region ID: {self.id}; Region name: {self.name}>'
+region = Blueprint('regions', __name__)
 
 
-class CarTaxParam(db.Model):
-    id = db.Column(db.Serial, primary_key=True)
-    city_id = db.Column(db.Integer, ForeignKey('region.id'))
-    from_hp_car = db.Column(db.Integer, nullable = False)
-    to_hp_car = db.Column(db.Integer, nullable = False)
-    from_production_year_car = db.Column(db.Integer, nullable = False)
-    to_production_year_car = db.Column(db.Integer, nullable = False)
-    rate = db.Column(db.Numeric, nullable = False)
-
-    def getDataCar(self):
-        return f'< Tax ID: {self.id}; ' \
-               f'City ID {self.city_id}; ' \
-               f'From HP car: {self.from_hp_car}; ' \
-               f'To HP car: {self.to_hp_car}; ' \
-               f'From production year car {self.from_production_year_car}; ' \
-               f'To production year car: {self.to_production_year_car};' \
-               f'Rate: {self.rate} > '
-
-
-
-class AreaTaxParam(db.Model):
-    id = db.Column(db.Serial, primary_key=True)
-    city_id = db.Column(db.Integer, ForeignKey('Region.id'))
-    rate = db.Column(db.Numeric, nullable=False)
-
-    def getDataArea(self):
-        return f'<Tax ID: {self.id}; Region ID: {self.city_id}; Rate: {self.rate}>'
-
-
-
-
-@regions.route("/v1/region/add", methods = ['POST'])
-def AddRegion():
+@region.route("/v1/region/add", methods = ['POST'])
+def add_region():
     try:
-        region_code = request.json['regione_code']
+        region_code = request.json['region_code']
         region_name = request.json['region_name']
-        regions = Region.query.filter(Region.id.equal(region_code)).all()
-        if regions is None:
-            region = Region(name = region_name)
-            code = Region(id = region_code)
-            db.session.add(region)
-            db.session.add(code)
-            db.session.commit()
-            return {'done'}, 200
+        region      = Region.query.filter(Region.id.equal(region_code)).all()
+
+        if region is None:
+            region_code = Region(id   = region_code)
+            region_name = Region(name = region_name)
+            database.session.add(region_name)
+            database.session.add(region_code)
+            database.session.commit()
+            return jsonify({'message': f'Регион {region_name} успешно добавлен!'}), 200
         else:
-            return {'data exist'}, 400
+            return jsonify({'error': f'Регион {region_name} уже существует!'}), 400
     except:
-        {'error'}, 400
+        return jsonify({'error': 'Произошла техническая ошибка во время добавления региона!'}), 400
 
 
-@regions.route("/v1/region/update", methods = ['POST'])
-def UpdateRegion():
+@region.route("/v1/region/update", methods = ['POST'])
+def update_region():
     try:
-        region_code = request.json['regione_code']
+        region_code = request.json['region_code']
         region_name = request.json['region_name']
-        regions = Region.query.filter(Region.id.equal(region_code)).all()
-        if regions is None:
-            return {'data is not exist'}, 400
+        region      = Region.query.filter(Region.id.equal(region_code)).all()
+        if region is None:
+            return jsonify({'error': f'Регион {region_name} не существует!'}), 400
         else:
-            Region.query.filter_by(id=region_code).update({'name': region_name})
-            CarTaxParam.query.filter_by(city_id=region_code).update({'name': region_name})
-            AreaTaxParam.query.filter_by(city_id=region_code).update({'name': region_name})
-            db.session.commit()
-            return {'done'}, 200
+            Region.query.filter_by(id = region_code).update({'name': region_name})
+            CarTaxParam.query.filter_by(city_id = region_code).update({'name': region_name})
+            AreaTaxParam.query.filter_by(city_id = region_code).update({'name': region_name})
+            database.session.commit()
+            return jsonify({'message': f'Регион {region_name} успешно обновлён!'}), 200
     except:
-        {'error'}, 400
+        return jsonify({'error': 'Произошла техническая ошибка во время добавления региона!'}), 400
 
 
-
-@regions.route("/v1/region/delete", methods = ['POST'])
-def DeleteRegion():
+@region.route("/v1/region/delete", methods = ['POST'])
+def delete_region():
     try:
-        region_code = request.json['regione_code']
-        regions = Region.query.filter(Region.id.equal(region_code)).all()
-        if regions is None:
-            return {'data is not exist'}, 400
+        region_code = request.json['region_code']
+        region = Region.query.filter(Region.id.equal(region_code)).all()
+        if region is None:
+            return jsonify({'error': f'Регион {region_code} не существует!'}), 400
         else:
             Region.query.filter_by(id=region_code).delete()
             CarTaxParam.query.filter_by(city_id=region_code).delete()
             AreaTaxParam.query.filter_by(city_id=region_code).delete()
-            db.session.commit()
-            return {'done'}, 200
+            database.session.commit()
+            return jsonify({'message': f'Регион {region_code} успешно удалён!'}), 200
     except:
-        {'error'}, 400
+        return jsonify({'error': 'Произошла техническая ошибка во время добавления региона!'}), 400
 
 
-
-
-@regions.route("/v1/region/get", methods = ['GET'])
-def GetRegion(id):
+@region.route("/v1/region/get", methods = ['GET'])
+def get_region(id):
     try:
-        region = list(map(lambda x: x.getData(), Region.query.filter_by(id=id).all()))
-        return region, 200
+        region = list(map(lambda x: x.getData(), Region.query.filter_by(id = id).all()))
+        return jsonify({'message': region}), 200
     except:
-        {'error'}, 400
+        return jsonify({'error': 'Произошла техническая ошибка!'}), 400
 
 
-
-@regions.route("/v1/region/get/all", methods = ['GET'])
-def GetRegionAll(all):
+@region.route("/v1/region/get/all", methods = ['GET'])
+def get_all_region():
     try:
         region = list(map(lambda x: x.getData(), Region.query.all()))
-        return region, 200
+        return jsonify({'message': region}), 200
     except:
-        {'error'}, 400
+        return jsonify({'error': 'Произошла техническая ошибка!'}), 400

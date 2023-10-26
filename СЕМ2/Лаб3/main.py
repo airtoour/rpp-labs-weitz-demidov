@@ -1,13 +1,14 @@
-from Config import app
+from flask               import Flask
+from routes.region_route import region
+from routes.car_route    import cars
+from routes.area_route   import area_route
 
-from routes.region_route import regions
-from routes.car_route import cars
-from routes.area_route import area_route
+app = Flask(__name__)
 
-app.register_blueprint(regions)
+# Регистрация Blueprint
+app.register_blueprint(region)
 app.register_blueprint(cars)
 app.register_blueprint(area_route)
 
-
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug = True)
