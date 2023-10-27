@@ -83,23 +83,23 @@ def add_tax_param():
 # Эндпоинт для добавления автомобиля
 @app.route('/v1/add/auto', methods=['POST'])
 def add_auto():
-    req = request.get_json()
-    id_req = req['id']
-    city_id = req['city_id']  # Используем 'city_code' вместо 'city_id' для соответствия запросу
-    tax_id = req['tax_id']
-    name = req['name']
-    horse_power = req['horse_power']
+    req             = request.get_json()
+    id_req          = req['id']
+    city_id         = req['city_id']
+    tax_id          = req['tax_id']
+    name            = req['name']
+    horse_power     = req['horse_power']
     production_year = req['production_year']
 
     # Проверяем данные на наличие в таблице region
-    cur.execute("SELECT * FROM region WHERE id = %s", (city_id,))
+    cur.execute("select * from region where id = %s", (city_id,))
     region_exists = cur.fetchone()
 
     if not region_exists:
         return jsonify({'error': f"Регион с кодом {city_id} не найден в таблице region"}), 400
 
     # Проверка наличия налогообложения
-    cur.execute("SELECT * FROM tax_param WHERE id = %s", (tax_id,))
+    cur.execute("select * from tax_param where id = %s", (tax_id,))
     tax_exists = cur.fetchone()
 
     if not tax_exists:
@@ -109,11 +109,11 @@ def add_auto():
     tax = horse_power * tax_exists[6]
 
     # Сохранение данных в таблицу auto
-    cur.execute("""INSERT INTO auto(id, city_id, tax_id, name, horse_power, production_year, tax)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s)""", (id_req, city_id, tax_id, name, horse_power,
+    cur.execute("""insert into auto(id, city_id, tax_id, name, horse_power, production_year, tax)
+                    values (%s, %s, %s, %s, %s, %s, %s)""", (id_req, city_id, tax_id, name, horse_power,
                                                              production_year, tax))
     conn.commit()
-    return jsonify({'message': 'Автомобиль успешно добавлен'}), 200
+    return jsonify({'message': f"Автомобиль {name} успешно добавлен"}), 200
 
 
 # Задание 4
