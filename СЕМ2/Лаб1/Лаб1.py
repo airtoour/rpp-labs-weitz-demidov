@@ -27,7 +27,7 @@ def add_region():
     region_exists = cur.fetchone()
 
     if region_exists:
-        return jsonify({'message': f"id региона: ' {city_id} '  уже существует в таблице region!"}), 400
+        return jsonify({'error': f"id региона: ' {city_id} '  уже существует в таблице region!"}), 400
     else:
         try:
             # Инсёртим данные в таблицу region
@@ -118,7 +118,7 @@ def add_auto():
 
 # Задание 4
 # Эндпоинт получения информации по всем автомобилям
-@app.route('/v1/auto/<id>', methods = ['GET'])
+@app.route('/v1/auto/<id>', methods=['GET'])
 def auto(auto_id):
     try:
         cur.execute("select * from auto where id = %s", (auto_id,))

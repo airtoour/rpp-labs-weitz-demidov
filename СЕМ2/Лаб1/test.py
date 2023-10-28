@@ -2,9 +2,10 @@ import requests
 
 # Запрос добавления информации о регионе /v1/add/region
 url  = 'http://localhost:5000/v1/add/region'
-data = {'id':   14,
-        'name': 'Павлодар'}
+data = {'id':   54,
+        'name': 'Новосибирск'}
 response = requests.post(url, json = data)
+
 if response.status_code == 200:
     json_data = response.json()
     print(json_data)
