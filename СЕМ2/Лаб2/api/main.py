@@ -6,7 +6,6 @@ from api.update import update
 
 app = Flask(__name__)
 
-dict = {}
 
 app.register_blueprint(add)
 app.register_blueprint(fetch)
