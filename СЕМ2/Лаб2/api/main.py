@@ -1,11 +1,10 @@
-from flask import Flask
+from flask  import Flask
 
-from api.add import add
-from api.fetch import fetch
-from api.update import update
+from add    import add
+from fetch  import fetch
+from update import update
 
 app = Flask(__name__)
-
 
 app.register_blueprint(add)
 app.register_blueprint(fetch)
