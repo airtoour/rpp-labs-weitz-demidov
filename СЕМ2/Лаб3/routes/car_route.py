@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from routes.region_route import Region, CarTaxParam
+from region_route import Region, CarTaxParam
 from config import database
 
 cars = Blueprint('cars', __name__)
@@ -23,7 +23,7 @@ def add_car():
         from_production_year_car_in_table = CarTaxParam.query.filter(CarTaxParam.from_production_year_car.equal(from_production_year_car)).all()
         to_production_year_car_in_table   = CarTaxParam.query.filter(CarTaxParam.to_production_year_car.equal(to_production_year_car)).all()
 
-        if region is None:
+        if not region:
             return jsonify({'error': f'Регион {region} не существует!'}), 400
         elif region and car_id and region_in_car_table and from_hp_car_in_table and to_hp_car_in_table \
                 and from_production_year_car_in_table and to_production_year_car_in_table:
@@ -56,7 +56,7 @@ def update_car():
         from_production_year_car_in_table = CarTaxParam.query.filter(CarTaxParam.from_production_year_car.equal(from_production_year_car)).all()
         to_production_year_car_in_table   = CarTaxParam.query.filter(CarTaxParam.to_production_year_car.equal(to_production_year_car)).all()
 
-        if region is None:
+        if not region:
             return jsonify({'error': f'Регион {region} не существует!'}), 400
         elif region and car_id and region_in_car_table and from_hp_car_in_table and to_hp_car_in_table \
                 and from_production_year_car_in_table and to_production_year_car_in_table:
@@ -80,7 +80,7 @@ def delete_car():
         city_id = request.json['city_id']
         region  = Region.query.filter(Region.id.equal(city_id)).all()
         car     = CarTaxParam.query.filter(CarTaxParam.city_id.equal(city_id)).all()
-        if region and car:
+        if not region and not car:
             CarTaxParam.query.filter_by(city_id=city_id).delete()
             database.session.commit()
             return jsonify({'message': f'Машина {car} успешно удалён!'}), 200

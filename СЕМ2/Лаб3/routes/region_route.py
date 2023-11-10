@@ -12,8 +12,8 @@ def add_region():
         region_name = request.json['region_name']
         region      = Region.query.filter(Region.id.equal(region_code)).all()
 
-        if region is None:
-            region_code = Region(id   = region_code)
+        if not region:
+            region_code = Region(id = region_code)
             region_name = Region(name = region_name)
             database.session.add(region_name)
             database.session.add(region_code)
@@ -31,7 +31,7 @@ def update_region():
         region_code = request.json['region_code']
         region_name = request.json['region_name']
         region      = Region.query.filter(Region.id.equal(region_code)).all()
-        if region is None:
+        if not region:
             return jsonify({'error': f'Регион {region_name} не существует!'}), 400
         else:
             Region.query.filter_by(id = region_code).update({'name': region_name})
@@ -48,7 +48,7 @@ def delete_region():
     try:
         region_code = request.json['region_code']
         region = Region.query.filter(Region.id.equal(region_code)).all()
-        if region is None:
+        if not region:
             return jsonify({'error': f'Регион {region_code} не существует!'}), 400
         else:
             Region.query.filter_by(id=region_code).delete()

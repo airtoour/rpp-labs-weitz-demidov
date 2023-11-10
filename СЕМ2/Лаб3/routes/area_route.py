@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from routes.region_route import Region, AreaTaxParam
+from region_route import Region, AreaTaxParam
 from config import database
 
 area_route = Blueprint('area_route', __name__)
@@ -12,7 +12,7 @@ def add_area():
         tax         = request.json['tax_rate']
         regions     = AreaTaxParam.query.filter(AreaTaxParam.city_id.equal(region_code)).all()
 
-        if regions is None:
+        if not regions:
             new_data = AreaTaxParam(region_code, tax)
             database.session.add(new_data)
             database.session.commit()
@@ -29,7 +29,7 @@ def update_area():
         region_code = request.json['city_id']
         tax         = request.json['tax_rate']
         region      = AreaTaxParam.query.filter(AreaTaxParam.city_id.equal(region_code)).all()
-        if region is None:
+        if not region:
             return jsonify({'error': f'Регион {region_code} не существует!'}), 400
         else:
             AreaTaxParam.query.filter_by(city_id=region_code).update({'city_id': region_code, 'tax_rate': tax})
@@ -44,7 +44,7 @@ def delete_area():
     try:
         region_code = request.json['city_id']
         region      = AreaTaxParam.query.filter(AreaTaxParam.city_id.equal(region_code)).all()
-        if region is None:
+        if not region:
             return jsonify({'error': f'Регион {region_code} не существует!'}), 400
         else:
             AreaTaxParam.query.filter_by(city_id=region_code).delete()

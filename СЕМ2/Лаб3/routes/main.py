@@ -1,7 +1,7 @@
-from flask               import Flask
-from routes.region_route import region
-from routes.car_route    import cars
-from routes.area_route   import area_route
+from flask        import Flask
+from region_route import region
+from car_route    import cars
+from area_route   import area_route
 
 app = Flask(__name__)
 
