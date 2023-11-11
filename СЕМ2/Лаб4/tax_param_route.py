@@ -52,7 +52,7 @@ def show_update_tax_param_form():
 
 @tax_param.route('/web/tax-param/update', methods=['POST'])
 def show_update_tax_param():
-    # Получаем данные из формы, что обновить
+    # Получаем данные из формы, для обновления
     city_id                  = request.form.get('city_id')
     from_hp_car              = request.form.get('from_hp_car')
     to_hp_car                = request.form.get('to_hp_car')

@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request
-from models import database, Region  # Предполагается, что у вас есть модель Region в файле models.py
+from models import database, Region
 
 region = Blueprint('region', __name__)
 
