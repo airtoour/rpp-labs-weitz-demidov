@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from region_route import Region, AreaTaxParam
+from region_route import AreaTaxParam
 from config import database
 
 area_route = Blueprint('area_route', __name__)
