@@ -1,74 +1,80 @@
 from flask import Blueprint, render_template, request
-from models import database, Region
+from models import db, Region
 
-region = Blueprint('region', __name__)
+region = Blueprint('region', __name__, template_folder='templates')
 
-@region.route('/web/region', methods = ['GET'])
+@region.route('/list', methods=['GET', 'POST'])
 def show_regions():
-    regions = Region.query.all()  # Получаем все регионы из базы данных
-    return render_template('region-list.html', regions = regions)
+    regions = Region.query.all()
+    print(regions)  # Вывод в консоль Flask
+    return render_template('region-list.html', regions=regions)
 
 
-@region.route('/web/region/add', methods = ['GET'])
-def show_add_region():
-    return render_template('region-add.html')
-
-@region.route('/web/region/add', methods = ['POST'])
+@region.route('/add', methods=['GET', 'POST'])
 def add_region():
     # Логика добавления региона в базу данных
     region_code = request.form.get('id')
     region_name = request.form.get('name')
 
-    if region_code and region_name:
-        new_region_code = Region(id = region_code)
-        new_region_name = Region(name = region_name)
-        database.session.add(new_region_code)
-        database.session.add(new_region_name)
-        database.session.commit()
-        message = f'Регион {region_code}, {region_name} успешно добавлен!'
+    if region_code:
+        if region_code and region_name:
+            new_region = Region(id=region_code, name=region_name)
+            db.session.add(new_region)
+            db.session.commit()
+            message = f'Регион {region_code}, {region_name} успешно добавлен!'
+        else:
+            db.session.rollback()
+            message = 'Произошла ошибка во время добавление региона!'
     else:
-        message = 'Произошла какая-то ошибка!'
+        message = ''
 
-    return render_template('region-add.html', message = message)
+    return render_template('region-add.html', message=message)
 
 
-@region.route('/web/region/update', methods=['GET'])
-def show_update_region():
-    return render_template('region-update.html')
-
-@region.route('/web/region/update', methods=['POST'])
+@region.route('/update', methods=['GET', 'POST'])
 def update_region():
     # Логика обновления региона в базе данных
     region_code = request.form.get('id')
     get_region = Region.query.get(region_code)
 
     if get_region:
-        # Обновление данных региона
-        get_region.name = request.form.get('name')
-        database.session.commit()
-        message = f'Регион {region_code} успешно обновлен!'
+        if get_region:
+            # Обновление данных региона
+            get_region.name = request.form.get('name')
+            db.session.commit()
+
+            message = f'Регион {region_code} успешно обновлен!'
+        elif not get_region:
+            db.session.rollback()
+            message = f'Регион с ID {region_code} не найден в базе данных!'
+        else:
+            db.session.rollback()
+            message = 'Произошла ошибка во время добавления региона!'
     else:
-        message = f'Регион с ID {region_code} не найден в базе данных!'
+        message = ''
 
-    return render_template('region-update.html', message = message)
+    return render_template('region-update.html', message=message)
 
 
-@region.route('/web/region/delete', methods=['GET'])
-def show_delete_region():
-    return render_template('region-delete.html')
-
-@region.route('/web/region/delete', methods=['POST'])
+@region.route('/delete', methods=['GET', 'POST'])
 def delete_region():
     # Логика удаления региона из базы данных
     region_code = request.form.get('id')
     get_region = Region.query.get(region_code)
 
     if get_region:
-        # Удаление региона
-        database.session.delete(get_region)
-        database.session.commit()
-        message = f'Регион {region_code} успешно удален!'
+        if get_region:
+            # Удаление региона
+            db.session.delete(get_region)
+            db.session.commit()
+            message = f'Регион {region_code} успешно удален!'
+        elif not get_region:
+            db.session.rollback()
+            message = f'Регион с ID {region_code} не найден в базе данных!'
+        else:
+            db.session.rollback()
+            message = 'Произошла ошибка во время добавление региона!'
     else:
-        message = f'Регион с ID {region_code} не найден в базе данных!'
+        message = ''
 
     return render_template('region-delete.html', message = message)
