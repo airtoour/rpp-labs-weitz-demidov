@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <meta charset="UTF-8">
+    <head>
+       <title>Удаление параметра налога на автомобиль</title>
+    </head>
+    <body>
+        <h1>Удаление параметра налога на автомобиль</h1>
+        <form action="/v1/car/tax-param/delete" method="post">
+            {{ form.hidden_tag() }}
+
+            <p>{{ form.code_rate.label() }}
+            <p>{{ form.code_rate() }}
+
+           {{ form.submit_delete() }}
+        </form>
+        {% if message %}
+        <p>{{ message }}</p>
+        {% endif %}
+    {% if form.errors %}
+    <ul class="errors">
+        {% for field, errors in form.errors.items() %}
+            {% for error in errors %}
+                <li>{{ field }}: {{ error }}</li>
+            {% endfor %}
+        {% endfor %}
+    </ul>
+{% endif %}
+    </body>
+</html>

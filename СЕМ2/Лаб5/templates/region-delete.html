@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <meta charset="UTF-8">
+    <head>
+        <title>Удаление региона</title>
+    </head>
+    <body>
+        <h1>Удаление региона</h1>
+        <form method="POST" action="/v1/region/delete">
+            {{ form.hidden_tag() }}
+
+            <p>{{ form.region_code.label() }}
+            <p>{{ form.region_code() }}
+
+           {{ form.submit_delete() }}
+        </form>
+        {% if message %}
+        <p>{{ message }}</p>
+        {% endif %}
+    </body>
+</html>
