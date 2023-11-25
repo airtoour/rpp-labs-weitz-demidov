@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.1">
+    <title>Обновить объект налогообложения</title>
+</head>
+    <body>
+        <h1>Обновить объект налогообложения</h1>
+        <form action="/car/tax-param/add" method="post">
+
+            <label for="city_id">Номер региона: </label>
+            <input type="text" name="city_id" required><br>
+
+            <label for="from_hp_car">Нижний диапозон лошадиных сил: </label>
+            <input type="text" name="from_hp_car"><br>
+
+            <label for="to_hp_car">Верхний диапозон лошадиных сил: </label>
+            <input type="text" name="to_hp_car"><br>
+
+            <label for="from_production_year_car">Нижний диапозон лет эксплуатации: </label>
+            <input type="text" name="from_production_year_car"><br>
+
+            <label for="to_production_year_car">Верхний диапозон лошадиных сил: </label>
+            <input type="text" name="to_production_year_car"><br>
+
+            <label for="tax_rate">Налоговая ставка (%/100): </label>
+            <input type="text" name="tax_rate"><br>
+
+            <button type="submit">Обновить объект налогообложения</button>
+        </form>
+
+        {% if message %}
+            <p>{{ message }}</p>
+        {% endif %}
+    </body>
+</html>

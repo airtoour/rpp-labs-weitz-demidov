@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Список объектов налогообложения</title>
+</head>
+    <body>
+        <h1>Список объектов налогообложения</h1>
+        <form action="/car/tax-param/list" method="post"></form>
+        <ul>
+            {% for tax_param in tax_params %}
+                <li>Номер региона: {{ tax_param.city_id }}
+                    НЛС: {{ tax_param.from_hp_car }}
+                    ВЛС: {{ tax_param.to_hp_car }}
+                    НЛЭ: {{ tax_param.from_production_year_car }}
+                    ВЛЭ: {{ tax_param.to_production_year_car }}
+                    Ставка: {{ tax_param.tax_rate }}
+                </li>
+            {% endfor %}
+        </ul>
+    </body>
+</html>

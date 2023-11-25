@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Расчет налога на автомобиль</title>
+</head>
+<body>
+    <h1>Расчет налога на автомобиль</h1>
+    <form action="/v1/car/tax/calc" method="post">
+        <label for="regionNumber">Номер региона:</label>
+        <input type="text" name="regionNumber" required><br>
+
+        <label for="carYear">Год производства автомобиля:</label>
+        <input type="text" name="carYear" required><br>
+
+        <label for="horsepower">Количество лошадиных сил в автомобиле:</label>
+        <input type="text" name="horsepower" required><br>
+
+        <button type="submit">Рассчитать налог</button>
+    </form>
+    <p>{{ result }}</p>
+</body>
+</html>

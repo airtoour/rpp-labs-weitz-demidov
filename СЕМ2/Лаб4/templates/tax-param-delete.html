@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.1">
+    <title>Удалить объект налогообложения</title>
+</head>
+    <body>
+        <h1>Удалить объект налогообложения</h1>
+        <form action="/car/tax-param/add" method="post">
+
+            <label for="city_id">Номер удаляемого региона: </label>
+            <input type="text" name="city_id" required><br>
+
+            <button type="submit">Удалить объект налогообложения</button>
+        </form>
+
+        {% if message %}
+            <p>{{ message }}</p>
+        {% endif %}
+    </body>
+</html>
