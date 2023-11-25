@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <meta charset="UTF-8">
+    <head>
+        <title>Добавление региона</title>
+    </head>
+    <body>
+        <h1>Добавление региона</h1>
+        <form action="/region/add" method="POST" >
+            {{ form.hidden_tag() }}
+
+            <p>{{ form.region_code.label() }}
+            <p>{{ form.region_code() }}
+
+            <p>{{ form.name.label }}
+            <p>{{ form.name() }}
+
+           {{ form.submit() }}
+        </form>
+
+        {% if message %}
+            <p>{{ message }}</p>
+        {% endif %}
+    </body>
+</html>

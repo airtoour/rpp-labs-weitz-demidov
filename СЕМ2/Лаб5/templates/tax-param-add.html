@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <meta charset="UTF-8">
+    <head>
+       <title>Добавление параметра налога на автомобиль</title>
+    </head>
+    <body>
+        <h1>Добавление параметра налога на автомобиль</h1>
+        <form action="/tax-param/add" method="post">
+            {{ form.hidden_tag() }}
+
+            <p>{{ form.code_rate.label() }}
+            <p>{{ form.code_rate() }}
+
+            <p>{{ form.region_code.label }}
+            <p>{{ form.region_code() }}
+
+            <p>{{ form.from_hp_car.label }}
+            <p>{{ form.from_hp_car() }}
+
+            <p>{{ form.to_hp_car.label }}
+            <p>{{ form.to_hp_car() }}
+
+            <p>{{ form.from_production_year_car.label }}
+            <p>{{ form.from_production_year_car() }}
+
+            <p>{{ form.to_production_year_car.label }}
+            <p>{{ form.to_production_year_car() }}
+
+            <p>{{ form.rate.label }}
+            <p>{{ form.rate() }}
+
+            {{ form.submit() }}
+
+        </form>
+        {% if message %}
+            <p>{{ message }}</p>
+        {% endif %}
+    </body>
+</html>

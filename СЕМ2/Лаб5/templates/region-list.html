@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <meta charset="UTF-8">
+    <head>
+        <title>Список регионов</title>
+    </head>
+    <body>
+        <h1>Список регионов</h1>
+        <form action="/region/list" method="post">
+            <ul>
+                {% for region in regions %}
+                    <li>{{ region.name }} ({{ region.id }})</li>
+                {% endfor %}
+            </ul>
+        </form>
+    </body>
+</html>
