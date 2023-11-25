@@ -6,35 +6,37 @@
     </head>
     <body>
         <h1>Список параметров налога для автомобилей</h1>
-        {% if car_tax_params %}
-        <table style="border: 1px solid">
-            <thead>
-                <tr>
-                    <th style="border: 1px solid">Код ставки</th>
-                    <th style="border: 1px solid">Код региона</th>
-                    <th style="border: 1px solid">Мощность автомобиля от</th>
-                    <th style="border: 1px solid">Мощность автомобиля до</th>
-                    <th style="border: 1px solid">Год выпуска автомобиля от</th>
-                    <th style="border: 1px solid">Год выпуска автомобиля до</th>
-                    <th style="border: 1px solid">Ставка налога</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for car_tax_param in car_tax_params %}
-                <tr>
-                    <td style="border: 1px solid; text-align: center">{{ car_tax_param.id }}</td>
-                    <td style="border: 1px solid; text-align: center">{{ car_tax_param.city_id }}</td>
-                    <td style="border: 1px solid; text-align: center">{{ car_tax_param.from_hp_car }}</td>
-                    <td style="border: 1px solid; text-align: center">{{ car_tax_param.to_hp_car }}</td>
-                    <td style="border: 1px solid; text-align: center">{{ car_tax_param.from_production_year_car }}</td>
-                    <td style="border: 1px solid; text-align: center">{{ car_tax_param.to_production_year_car }}</td>
-                    <td style="border: 1px solid; text-align: center">{{ car_tax_param.rate }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% else %}
-        <p>Нет доступных данных для вывода</p>
-        {% endif %}
+        <form action="/tax-param/list" method="post">
+            {% if car_tax_params %}
+                <table style="border: 1px solid">
+                    <thead>
+                        <tr>
+                            <th style="border: 1px solid">Код ставки</th>
+                            <th style="border: 1px solid">Код региона</th>
+                            <th style="border: 1px solid">Мощность автомобиля от</th>
+                            <th style="border: 1px solid">Мощность автомобиля до</th>
+                            <th style="border: 1px solid">Год выпуска автомобиля от</th>
+                            <th style="border: 1px solid">Год выпуска автомобиля до</th>
+                            <th style="border: 1px solid">Ставка налога</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for car_tax_param in car_tax_params %}
+                            <tr>
+                                <td style="border: 1px solid; text-align: center">{{ car_tax_param.id }}</td>
+                                <td style="border: 1px solid; text-align: center">{{ car_tax_param.city_id }}</td>
+                                <td style="border: 1px solid; text-align: center">{{ car_tax_param.from_hp_car }}</td>
+                                <td style="border: 1px solid; text-align: center">{{ car_tax_param.to_hp_car }}</td>
+                                <td style="border: 1px solid; text-align: center">{{ car_tax_param.from_production_year_car }}</td>
+                                <td style="border: 1px solid; text-align: center">{{ car_tax_param.to_production_year_car }}</td>
+                                <td style="border: 1px solid; text-align: center">{{ car_tax_param.rate }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>Нет доступных данных для вывода</p>
+            {% endif %}
+        </form>
     </body>
 </html>

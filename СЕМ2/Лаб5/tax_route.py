@@ -4,12 +4,18 @@ from models import TaxRouteForm, CarTaxParam
 tax = Blueprint('tax_route', __name__, template_folder='templates')
 
 
-@tax.route('/v1/car/tax/calc', methods=['GET', 'POST'])
+@tax.route('/', methods=['GET'])
+def get_calculate_tax():
+    form = TaxRouteForm(request.form)
+    return render_template('index.html', form=form)
+
+
+@tax.route('/calc', methods=['GET', 'POST'])
 def calculate_tax():
     form = TaxRouteForm(request.form)
     if form.validate_on_submit():
-        code_rate = form.code_rate.data
-        year = form.year.data
+        code_rate  = form.code_rate.data
+        year       = form.year.data
         horsepower = form.horsepower.data
 
         tax_object = CarTaxParam.query.filter_by(id=code_rate). \
@@ -22,16 +28,10 @@ def calculate_tax():
             message = 'Объект налогообложения по заданным параметрам не найден'
         else:
             tax_rate = tax_object.rate
-            tax = horsepower * tax_rate
-            message = f'Налог на автомобиль с мощностью {horsepower} л.с. составит {tax} руб.'
+            tax_calc = horsepower * tax_rate
+            message = f'Налог на автомобиль с мощностью {horsepower} л.с. составит {tax_calc} руб.'
         return render_template('index.html', form=form, message=message)
 
     else:
         message = 'Проверьте правильность введенных данных'
     return render_template('index.html', form=form, message=message)
-
-
-@tax.route('/', methods=['GET'])
-def get_calculate_tax():
-    form = TaxRouteForm(request.form)
-    return render_template('index.html', form=form)

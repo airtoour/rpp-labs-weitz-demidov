@@ -6,7 +6,7 @@
     </head>
     <body>
         <h1>Обновление параметра налога на автомобиль</h1>
-        <form action="/v1/car/tax-param/update" method="post">
+        <form action="/tax-param/update" method="post">
             {{ form.hidden_tag() }}
 
             <p>{{ form.code_rate.label() }}
@@ -32,8 +32,9 @@
 
             {{ form.submit_update() }}
         </form>
+
         {% if message %}
-        <p>{{ message }}</p>
+            <p>{{ message }}</p>
         {% endif %}
     </body>
 </html>

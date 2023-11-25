@@ -6,7 +6,7 @@
     </head>
     <body>
         <h1>Расчет налога на автомобиль</h1>
-        <form action="/v1/car/tax/calc" method="POST">
+        <form action="/tax/calc" method="POST">
             {{ form.hidden_tag() }}
 
             <p>{{ form.code_rate.label() }}
@@ -20,6 +20,7 @@
 
            {{ form.submit() }}
         </form>
+
         <p>{{ message }}</p>
     </body>
 </html>

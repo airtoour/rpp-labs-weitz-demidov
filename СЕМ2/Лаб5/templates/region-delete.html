@@ -6,7 +6,7 @@
     </head>
     <body>
         <h1>Удаление региона</h1>
-        <form method="POST" action="/v1/region/delete">
+        <form action="/region/delete" method="post">
             {{ form.hidden_tag() }}
 
             <p>{{ form.region_code.label() }}
@@ -14,8 +14,9 @@
 
            {{ form.submit_delete() }}
         </form>
+
         {% if message %}
-        <p>{{ message }}</p>
+            <p>{{ message }}</p>
         {% endif %}
     </body>
 </html>

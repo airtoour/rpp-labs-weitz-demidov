@@ -120,5 +120,3 @@ def delete_car_tax_param():
     else:
         message = 'Проверьте правильность введенных данных'
     return render_template('tax-param-delete.html', form=form, message=message)
-
-# ДОПИСАТЬ ДО РАБОТОСПОСОБНОЙ ВЕРСИИ.

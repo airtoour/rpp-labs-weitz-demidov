@@ -6,7 +6,7 @@
     </head>
     <body>
         <h1>Добавление региона</h1>
-        <form action="/v1/region/add" method="POST" >
+        <form action="/region/add" method="POST" >
             {{ form.hidden_tag() }}
 
             <p>{{ form.region_code.label() }}
@@ -17,8 +17,9 @@
 
            {{ form.submit() }}
         </form>
+
         {% if message %}
-        <p>{{ message }}</p>
+            <p>{{ message }}</p>
         {% endif %}
     </body>
 </html>
