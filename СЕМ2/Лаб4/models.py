@@ -1,10 +1,10 @@
-from flask  import jsonify
+from flask import jsonify
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
 class Region(db.Model):
-    id   = db.Column(db.Integer,     primary_key = True)
+    id   = db.Column(db.Integer,    primary_key = True)
     name = db.Column(db.String(64), nullable    = False)
 
     def get_region(self):
@@ -14,7 +14,7 @@ class Region(db.Model):
             return jsonify({'error': f"Региона с таким ID: {self.id} и именем: {self.name} не существует!"}), 400
 
 class CarTaxParam(db.Model):
-    id                       = db.Column(db.Integer,                              primary_key = True)
+    id                       = db.Column(db.Integer,                             primary_key = True)
     city_id                  = db.Column(db.Integer, db.ForeignKey('region.id'), nullable    = False)
     from_hp_car              = db.Column(db.Integer,                             nullable    = False)
     to_hp_car                = db.Column(db.Integer,                             nullable    = False)
@@ -36,7 +36,7 @@ class CarTaxParam(db.Model):
 
 
 class AreaTaxParam(db.Model):
-    id       = db.Column(db.Integer,                              primary_key = True)
+    id       = db.Column(db.Integer,                             primary_key = True)
     city_id  = db.Column(db.Integer, db.ForeignKey('Region.id'), nullable    = False)
     tax_rate = db.Column(db.Numeric,                             nullable    = False)
 

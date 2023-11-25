@@ -6,7 +6,6 @@ region = Blueprint('region', __name__, template_folder='templates')
 @region.route('/list', methods=['GET', 'POST'])
 def show_regions():
     regions = Region.query.all()
-    print(regions)  # Вывод в консоль Flask
     return render_template('region-list.html', regions=regions)
 
 
@@ -78,3 +77,11 @@ def delete_region():
         message = ''
 
     return render_template('region-delete.html', message = message)
+
+
+@region.route('/numbers/a=<int:a>&b=<int:b>', methods=['GET', 'POST'])
+def show_numbers(a, b):
+    show_a = a
+    show_b = b
+
+    return render_template('numbers.html', a=show_a, b=show_b)

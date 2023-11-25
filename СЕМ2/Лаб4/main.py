@@ -1,9 +1,9 @@
 from flask     import Flask
-from region_routes    import region
+from region_routes   import region
 from tax_param_route import tax_param
 from tax_route       import tax
-from config    import app
-from models    import db
+from config          import app
+from models          import db
 
 # Инициализация Blueprint
 app.register_blueprint(region, url_prefix='/region')
