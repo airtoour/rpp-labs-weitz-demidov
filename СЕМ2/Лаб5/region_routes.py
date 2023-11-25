@@ -91,12 +91,13 @@ def plus_minus():
         operation  = form.operation.data
 
         if operation == '+':
-            message = number_one + number_two
+            message = str(number_one + number_two)
         elif operation == '-':
-            message = number_one - number_two
+            message = str(number_one - number_two)
         else:
             message = ''
     else:
         message = 'Проверьте правильность введенных данных'
+        #message += f'\nErrors: {form.errors}'
 
-`    return render_template('plus-minus.html', form=form, message=message)
+    return render_template('plus-minus.html', form=form, message=message)
