@@ -1,11 +1,17 @@
 from flask import Blueprint, request, render_template
-from models import Region, CarTaxParam, TaxParamForm, TaxParamForm_delete
+from models import Region, CarTaxParam, TaxParamForm, TaxParamFormDelete
 from config import db
 
 tax_param = Blueprint('tax_param', __name__)
 
-# Добавление данных в таблицу Параметр налогообложения
-@tax_param.route('/v1/car/tax-param/add', methods=['POST'])
+@tax_param.route('/list', methods=['GET'])
+def get_tax_param_get():
+    car_tax_params = CarTaxParam.query.all()
+    form = TaxParamForm(request.form)
+    return render_template('tax-param-list.html',  car_tax_params=car_tax_params, form=form)
+
+
+@tax_param.route('/add', methods=['GET', 'POST'])
 def add_car_tax_param():
     form = TaxParamForm(request.form)
     if form.validate_on_submit():
@@ -47,15 +53,7 @@ def add_car_tax_param():
     return render_template('tax-param-add.html', form=form, message=message)
 
 
-@tax_param.route('/web/tax-param/add', methods=['GET'])
-def get_tax_param_add():
-    form = TaxParamForm(request.form)
-    return render_template('tax-param-add.html', form=form)
-
-# Обновление данных в таблицу Параметр налогообложения
-
-
-@tax_param.route('/v1/car/tax-param/update', methods=['POST'])
+@tax_param.route('/update', methods=['GET', 'POST'])
 def update_car_tax_param():
     form = TaxParamForm(request.form)
     if form.validate_on_submit():
@@ -102,17 +100,9 @@ def update_car_tax_param():
     return render_template('tax-param-update.html', form=form, message=message)
 
 
-@tax_param.route('/web/tax-param/update', methods=['GET'])
-def get_tax_param_update():
-    form = TaxParamForm(request.form)
-    return render_template('tax-param-update.html', form=form)
-
-# Удаление данных в таблице Параметр налогообложения
-
-
-@tax_param.route('/v1/car/tax-param/delete', methods=['POST'])
+@tax_param.route('/delete', methods=['GET', 'POST'])
 def delete_car_tax_param():
-    form = TaxParamForm_delete(request.form)
+    form = TaxParamFormDelete(request.form)
     if form.validate_on_submit():
         code_rate = form.code_rate.data
 
@@ -131,18 +121,4 @@ def delete_car_tax_param():
         message = 'Проверьте правильность введенных данных'
     return render_template('tax-param-delete.html', form=form, message=message)
 
-
-@tax_param.route('/web/tax-param/delete', methods=['GET'])
-def get_tax_param_delete():
-    form = TaxParamForm_delete(request.form)
-    return render_template('tax-param-delete.html', form=form)
-
-
-# Вывод данных из таблицы Параметр налогообложения
-
-
-@tax_param.route('/web/tax-param', methods=['GET'])
-def get_tax_param_get():
-    car_tax_params = CarTaxParam.query.all()
-    form = TaxParamForm(request.form)
-    return render_template('tax-param-list.html',  car_tax_params=car_tax_params, form=form)
+# ДОПИСАТЬ ДО РАБОТОСПОСОБНОЙ ВЕРСИИ.

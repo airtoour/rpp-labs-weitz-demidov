@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <meta charset="UTF-8">
+    <head>
+        <title>Сложение и вычитание</title>
+    </head>
+    <body>
+        <h1>Сложение и вычитание</h1>
+        <form action="/region/minus_plus_numbers" method="post" >
+            {{ form.hidden_tag() }}
+
+            <p>{{ form.number_one.label() }}
+            <p>{{ form.number_two }}
+
+            <p>{{ form.number_two.label }}
+            <p>{{ form.number_two }}
+
+            <p>{{ form.operation.label }}</p>
+            <p>{{ form.operation }}</p>
+
+           {{ form.submit() }}
+        </form>
+
+        {% if message %}
+            <p>{{ message }}</p>
+        {% endif %}
+    </body>
+</html>

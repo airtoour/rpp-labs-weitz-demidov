@@ -1,5 +1,5 @@
 from flask  import Blueprint, request, render_template
-from models import Region, RegionForm, CarTaxParam, RegionFormDelete
+from models import Region, RegionForm, CarTaxParam, RegionFormDelete, PlusMinusForm
 from config import db
 
 region = Blueprint('region', __name__, template_folder='templates')
@@ -79,3 +79,24 @@ def delete_region():
     else:
         message = 'Проверьте правильность введенных данных'
     return render_template('region-delete.html', form=form, message=message)
+
+
+@region.route('/minus_plus_numbers', methods=['GET', 'POST'])
+def plus_minus():
+    form = PlusMinusForm(request.form)
+
+    if form.validate_on_submit():
+        number_one = form.number_one.data
+        number_two = form.number_two.data
+        operation  = form.operation.data
+
+        if operation == '+':
+            message = number_one + number_two
+        elif operation == '-':
+            message = number_one - number_two
+        else:
+            message = ''
+    else:
+        message = 'Проверьте правильность введенных данных'
+
+`    return render_template('plus-minus.html', form=form, message=message)
