@@ -1,4 +1,3 @@
-from flask     import Flask
 from region_routes   import region
 from tax_param_route import tax_param
 from tax_route       import tax

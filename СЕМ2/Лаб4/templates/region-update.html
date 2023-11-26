@@ -1,24 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Обновление региона</title>
-</head>
-<body>
-    <h1>Обновить регион</h1>
-    <form action="/region/update" method="post">
-        <label for="id">Номер региона:</label>
-        <input type="text" name="id" required><br>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Обновление региона</title>
+    </head>
 
-        <label for="name">Название региона:</label>
-        <input type="text" name="name" required><br>
+    <body>
+        <h1>Обновить регион</h1>
+        <form action="/region/update" method="post">
+            <label for="id">Номер региона:</label>
+            <input type="text" name="id" required><br>
 
-        <button type="submit">Обновить регион</button>
-    </form>
+            <label for="name">Название региона:</label>
+            <input type="text" name="name" required><br>
 
-    {% if message %}
-        <p>{{ message }}</p>
-    {% endif %}
-</body>
+            <button type="submit">Обновить регион</button>
+        </form>
+
+        {% if message %}
+            <p>{{ message }}</p>
+        {% endif %}
+    </body>
 </html>

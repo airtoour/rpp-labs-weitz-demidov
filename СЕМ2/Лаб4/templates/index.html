@@ -1,24 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Расчет налога на автомобиль</title>
-</head>
-<body>
-    <h1>Расчет налога на автомобиль</h1>
-    <form action="/v1/car/tax/calc" method="post">
-        <label for="regionNumber">Номер региона:</label>
-        <input type="text" name="regionNumber" required><br>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Расчет налога на автомобиль</title>
+    </head>
 
-        <label for="carYear">Год производства автомобиля:</label>
-        <input type="text" name="carYear" required><br>
+    <body>
+        <h1>Расчет налога на автомобиль</h1>
+        <form action="/tax/calc" method="post">
+            <label for="city_id">Номер региона: </label>
+            <input type="text" name="city_id" required><br>
 
-        <label for="horsepower">Количество лошадиных сил в автомобиле:</label>
-        <input type="text" name="horsepower" required><br>
+            <label for="hp_model">Количество лошадиных сил в автомобиле: </label>
+            <input type="text" name="hp_model" required><br>
 
-        <button type="submit">Рассчитать налог</button>
-    </form>
-    <p>{{ result }}</p>
-</body>
+            <label for="tax_model">Налоговая ставка: </label>
+            <input type="text" name="tax_model" required><br>
+
+            <button type="submit">Рассчитать налог</button>
+        </form>
+
+        {% if message %}
+            <p>{{ message }}</p>
+        {% endif %}
+    </body>
 </html>
