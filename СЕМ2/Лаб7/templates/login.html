@@ -7,15 +7,19 @@
 
     <body>
         <h1>Вход в аккаунт</h1>
+
         {% if remaining_requests > 0 %}
             <p>Осталось попыток входа: {{ remaining_requests }}</p>
         {% else %}
             <p>Слишком много попыток входа. Пожалуйста, попробуйте через {{ time_until_reset }} секунд.</p>
         {% endif %}
+
         <br>
+
         {% if err_message %}
             <h3>{{ err_message }}</h3>
         {% endif %}
+
         <br><br>
         <form action="/login" method="post" >
             <label for="email">Email:</label>

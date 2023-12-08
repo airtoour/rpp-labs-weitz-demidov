@@ -1,8 +1,8 @@
 from flask             import render_template, redirect, url_for, request
-from flask_login       import LoginManager, login_user, current_user, login_required
-from werkzeug.security import check_password_hash
+from flask_login import LoginManager, login_user, current_user, login_required, logout_user
+from werkzeug.security import check_password_hash, generate_password_hash
 from models            import Users
-from config            import app
+from config            import app, db
 import time
 
 login_manager = LoginManager(app)
@@ -43,3 +43,35 @@ def login():
             return render_template('signup.html', err_message=err_message)
 
     return render_template('login.html')
+
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    if request.method == 'POST':
+        name     = request.form.get('name')
+        email    = request.form.get('email')
+        password = request.form.get('password')
+
+        hash_pass = generate_password_hash(password)
+        checked_pass = check_password_hash(hash_pass, password)
+
+        existing_user = Users.query.filter_by(name=name).first()
+        if existing_user:
+            err_message = f'Пользователь с именем {name} существует, попробуйте войти.'
+            return render_template('login.html', err_message=err_message, email=email, password=hash_pass)
+        else:
+            new_user = Users(name=name, email=email, password=hash_pass)
+            db.session.add(new_user)
+            db.session.commit()
+
+            login_user(new_user)
+
+            return redirect(url_for('index'))
+
+    return render_template('signup.html')
+
+@app.route('/logout', methods=['GET', 'POST'])
+@login_required
+def logout():
+    logout_user()
+    err_message = 'Вы вышли из аккаунта'
+    return render_template('login.html', err_message=err_message)
