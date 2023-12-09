@@ -16,9 +16,8 @@ def load_user(user_id):
 @login_required
 def index():
     if current_user.is_authenticated:
-        return render_template('index.html')
-    else:
-        return redirect(url_for('login'))
+        email = current_user.email
+        return render_template('index.html', email=email)
 
 
 @app.route('/login', methods=['GET', 'POST'])
