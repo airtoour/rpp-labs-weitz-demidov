@@ -1,77 +1,37 @@
-from flask             import render_template, redirect, url_for, request
-from flask_login import LoginManager, login_user, current_user, login_required, logout_user
-from werkzeug.security import check_password_hash, generate_password_hash
-from models            import Users
-from config            import app, db
+from flask import Blueprint, request
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from db_data import users_credentials
+import requests
 import time
 
-login_manager = LoginManager(app)
-login_manager.login_view = 'login'
+login = Blueprint('login', __name__)
+limiter = Limiter(login, key_func=get_remote_address)
 
-max_requests      = 10
-current_requests  = 0
-last_request_time = time.time()
+def make_login_request(username, password):
+    login_url = "http://your-api-url/login"  # Замените "your-api-url" на фактический URL вашего API
+    data = {'email': username, 'password': password}
+    response = requests.post(login_url, data=data)
+    return response
 
+@limiter.request_filter
+def ip_whitelist():
+    return False  # Отключение ограничения по IP, чтобы использовать ограничение запросов на уровне эндпоинта
 
-@login_manager.user_loader
-def load_user(user_id):
-    return Users.query.get(int(user_id))
+@login.route('/login', methods=['POST'])
+@limiter.limit("10 per minute")  # Ограничение 10 запросов в минуту
+def login_route():
+    username = request.form.get('email')
+    password = request.form.get('password')
 
+    for _ in range(3):  # Попробовать три раза перед приостановкой
+        response = make_login_request(username, password)
 
-@app.route('/index', methods = ['GET', 'POST'])
-@login_required
-def index():
-    if current_user.is_authenticated:
-        return render_template('index.html')
-    else:
-        return redirect(url_for('login'))
-
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
-
-        user = Users.query.filter_by(email=email).first()
-
-        if user and check_password_hash(user.password, password):
-            login_user(user)
-            return redirect(url_for('index'))
+        if response.status_code == 429:  # Too Many Requests
+            time.sleep(60)
+        elif response.status_code == 200:  # OK
+            return f"Successful login. Username: {username}, Password: {password}", 200
         else:
-            err_message = 'Такого пользователя не существует!'
-            return render_template('signup.html', err_message=err_message)
+            return f"Login failed for Username: {username}, Password: {password}", 401
 
-    return render_template('login.html')
-
-@app.route('/signup', methods=['GET', 'POST'])
-def signup():
-    if request.method == 'POST':
-        name     = request.form.get('name')
-        email    = request.form.get('email')
-        password = request.form.get('password')
-
-        hash_pass = generate_password_hash(password)
-        checked_pass = check_password_hash(hash_pass, password)
-
-        existing_user = Users.query.filter_by(name=name).first()
-        if existing_user:
-            err_message = f'Пользователь с именем {name} существует, попробуйте войти.'
-            return render_template('login.html', err_message=err_message, email=email, password=hash_pass)
-        else:
-            new_user = Users(name=name, email=email, password=hash_pass)
-            db.session.add(new_user)
-            db.session.commit()
-
-            login_user(new_user)
-
-            return redirect(url_for('index'))
-
-    return render_template('signup.html')
-
-@app.route('/logout', methods=['GET', 'POST'])
-@login_required
-def logout():
-    logout_user()
-    err_message = 'Вы вышли из аккаунта'
-    return render_template('login.html', err_message=err_message)
+    return "Login failed after multiple attempts", 401
