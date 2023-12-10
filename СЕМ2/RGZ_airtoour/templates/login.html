@@ -7,13 +7,16 @@
 
     <body>
         <h1>Вход в аккаунт</h1>
+
         {% if err_message %}
-            <h3>{{ err_message }}</h3>
+            <p>{{ err_message }}</p>
         {% endif %}
+
         <br><br>
-        <form action="/login" method="post" >
-            <label for="email">Email:</label>
-            <input type="text" name="email" required>
+
+        <form action="/login" method="post">
+            <label for="name">Имя пользователя:</label>
+            <input type="text" name="name" required>
             <br><br>
             <label for="password">Пароль:</label>
             <input type="password" name="password" required>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Operations</title>
+</head>
+    <body>
+        <h1>Operations</h1>
+
+        <form method="post">
+            <a href="{{ url_for('logout') }}">Logout</a>
+            <br>
+            <a href="{{ url_for('operation.view_operation', lang='ru') }}">Change language</a>
+            <br><br><br>
+
+            {{ form.hidden_tag() }}
+            {{ form.fromDate.label }}
+            {{ form.fromDate() }}
+            <br>
+            {{ form.endDate.label }}
+            {{ form.endDate() }}
+
+            {{ form.submit() }}
+        </form>
+
+        <h2>Operation List</h2>
+        <br><br>
+        <ul>
+            {% for operation in operations %}
+                <li>{{ operation.date }} - {{ operation.amount }}</li>
+            {% endfor %}
+        </ul>
+        <br><br>
+
+        <p>Total income:   {{ total_income }}</p>
+        <p>Total expenses: {{ total_expense }}</p>
+
+        <a href="{{ url_for('operation.add_operation') }}">Add operation</a>
+
+    </body>
+</html>
