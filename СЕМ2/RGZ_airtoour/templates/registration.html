@@ -10,7 +10,7 @@
             <p>{{ err_message }}</p>
         {% endif %}
 
-        <form action="{{ url_for('signup') }}" method="post">
+        <form action="{{ url_for('registration') }}" method="post">
             <label for="name">Логин:</label>
             <input type="text" id="name" name="name" required>
             <br><br>

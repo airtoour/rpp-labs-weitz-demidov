@@ -11,20 +11,23 @@
         <form method="post">
             <a href="{{ url_for('logout') }}">Logout</a>
             <br>
-            <a href="{{ url_for('operation.view_operation', lang='ru') }}">Change language</a>
-            <br><br><br>
+            <a href="{{ url_for('operation.view_operation', lang='ru') }}">RU</a>
+            <br><br>
 
             {{ form.hidden_tag() }}
-            {{ form.fromDate.label }}
+
+            <label for="fromDate">{{ form.fromDate.label.text }}</label>
             {{ form.fromDate() }}
             <br>
-            {{ form.endDate.label }}
+
+            <label for="endDate">{{ form.endDate.label.text }}</label>
             {{ form.endDate() }}
+            <br>
 
             {{ form.submit() }}
         </form>
 
-        <h2>Operation List</h2>
+        <h2>Operation list</h2>
         <br><br>
         <ul>
             {% for operation in operations %}
@@ -37,6 +40,5 @@
         <p>Total expenses: {{ total_expense }}</p>
 
         <a href="{{ url_for('operation.add_operation') }}">Add operation</a>
-
     </body>
 </html>

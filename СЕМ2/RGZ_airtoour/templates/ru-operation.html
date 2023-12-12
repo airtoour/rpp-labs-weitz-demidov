@@ -9,17 +9,20 @@
         <h1>Операции</h1>
 
         <form method="post">
-            <a href="{{ url_for('logout') }}">Выйти из аккаунта</a>
+            <a href="{{ url_for('logout') }}">Выйти</a>
             <br>
-            <a href="{{ url_for('operation.view_operation', lang='en') }}">Сменить язык</a>
-            <br><br><br>
+            <a href="{{ url_for('operation.view_operation', lang='en') }}">EN</a>
+            <br><br>
 
             {{ form.hidden_tag() }}
-            {{ form.fromDate.label }}
+
+            <label for="fromDate">{{ form.fromDate.label.text }}</label>
             {{ form.fromDate() }}
             <br>
-            {{ form.endDate.label }}
+
+            <label for="endDate">{{ form.endDate.label.text }}</label>
             {{ form.endDate() }}
+            <br>
 
             {{ form.submit() }}
         </form>
@@ -37,6 +40,5 @@
         <p>Общие расходы: {{ total_expense }}</p>
 
         <a href="{{ url_for('operation.add_operation') }}">Добавить операцию</a>
-
     </body>
 </html>

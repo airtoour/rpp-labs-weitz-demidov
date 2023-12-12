@@ -1,10 +1,12 @@
-from flask import Blueprint, render_template, redirect, url_for, request, get_flashed_messages
+from flask import Blueprint, render_template, redirect, url_for, request
 from flask_login       import LoginManager, login_user, current_user, login_required, logout_user
 from config            import app, db
-from models            import Users, OperationForm, Operation, SignInForm, OperationAdd
+from models            import Users, OperationFormRu, OperationFormEn, OperationAddDb, OperationAdd
 from datetime          import datetime, timedelta
-from flask             import flash
-from werkzeug.security import check_password_hash
+from flask_babel       import Babel, _
+
+babel = Babel(app)
+babel.init_app(app, default_locale='ru')
 
 operation = Blueprint('operation', __name__, template_folder='templates')
 
@@ -24,7 +26,7 @@ def login():
 
         user = Users.query.filter_by(name=name).first()
 
-        if user and check_password_hash(user.password, password):
+        if user and user.check_password(password):
             login_user(user)
             return redirect(url_for('operation.view_operation', lang='ru'))
         else:
@@ -76,7 +78,13 @@ def logout():
 @operation.route('/<lang>', methods=['GET', 'POST'])
 @login_required
 def view_operation(lang='ru'):
-    form = OperationForm()
+    if lang == 'en':
+        form = OperationFormEn()
+        form.fromDate.label.text = _('Start Date')
+        form.endDate.label.text = _('End Date')
+        form.submit.label.text = _('Find')
+    else:
+        form = OperationFormRu()
 
     if form.validate_on_submit():
         from_date = form.fromDate.data
@@ -85,36 +93,40 @@ def view_operation(lang='ru'):
         end_date = datetime.utcnow()
         from_date = end_date - timedelta(days=30)
 
-    operations = Operation.query.filter_by(user_id=current_user.id).filter(Operation.oper_date.between(from_date, end_date)).all()
+    operations = OperationAddDb.query.filter_by(
+        user_id=current_user.id).filter(OperationAddDb.oper_date.between(from_date, end_date)).all()
 
     total_income  = sum(op.amount for op in operations if op.amount >= 0)
     total_expense = sum(op.amount for op in operations if op.amount < 0)
 
-    return render_template(f'{lang}-operation.html', form=form, operations=operations, total_income=total_income, total_expense=total_expense)
+    return render_template(f'{lang}-operation.html', form=form, operations=operations,
+                           total_income=total_income, total_expense=total_expense)
 
 @operation.route('/add', methods=['GET', 'POST'])
 @login_required
 def add_operation():
     form = OperationAdd()
+
     if form.validate_on_submit():
         oper_id   = form.id.data
         oper_type = form.oper_type.data
         amount    = form.amount.data
-        date      = form.date.data
+        date      = form.oper_date.data
         user_id   = form.user_id.data
 
-        if Operation.query.filter_by(id=oper_id).first():
-            err_message = f'Операция с таким ID: {oper_id} уже существует!'
+        if OperationAddDb.query.filter_by(id=oper_id).first():
+            message = f'Операция с таким ID: {oper_id} уже существует!'
         else:
             try:
-                operations = Operation(id=oper_id, oper_type=oper_type, amount=amount, date=date, user_id=user_id)
+                operations = OperationAddDb(id=oper_id, oper_type=oper_type, amount=amount, oper_date=date, user_id=user_id)
                 db.session.add(operations)
                 db.session.commit()
-                err_message = f'Операция {oper_id} успешно добавлена!'
-            except:
+                message = f'Операция {oper_id} успешно добавлена!'
+            except Exception as e:
                 db.session.rollback()
-                err_message = 'Произошла ошибка во время добавления!'
-    else:
-        err_message = 'Неправильно введены данные, попробуйте снова.'
+                app.logger.error(f'Error during operation addition: {str(e)}')
+                message = 'Произошла ошибка во время добавления!'
 
-    return render_template('add_operation.html', form=form, err_message=err_message)
+        return render_template('add_operation.html', form=form, message=message)
+
+    return render_template('add_operation.html', form=form)
