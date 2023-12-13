@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <meta charset="UTF-8">
+    <head>
+        <title>Вход</title>
+    </head>
+
+    <body>
+        <h1>Вход</h1>
+
+        {% if err_message %}
+            <p>{{ err_message }}</p>
+        {% endif %}
+
+        <br><br>
+
+        <form action="/login" method="post">
+            <label for="name">Имя пользователя:</label>
+            <input type="text" name="name" required>
+            <br><br>
+            <label for="password">Пароль:</label>
+            <input type="password" name="password" required>
+            <br><br>
+            <button type="submit">Войти</button>
+        </form>
+    </body>
+</html>
