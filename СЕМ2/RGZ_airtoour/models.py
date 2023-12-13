@@ -2,13 +2,13 @@ from flask_wtf          import FlaskForm
 from flask_login        import UserMixin
 from werkzeug.security  import generate_password_hash, check_password_hash
 from wtforms            import (IntegerField, FloatField, StringField, EmailField,
-                                PasswordField, DateField, SubmitField, SelectField)
+                                PasswordField, DateField, SubmitField, SelectField, validators)
 from wtforms.validators import DataRequired, InputRequired, Length, Email
 from config             import db
 from flask_babel        import _  # Используется для локализации. Замена функции gettext
 
 class Users(db.Model, UserMixin):
-    id  = db.Column(db.Integer,     primary_key=True)
+    id       = db.Column(db.Integer,     primary_key=True)
     name     = db.Column(db.String(60),  nullable=False, unique=True)
     email    = db.Column(db.String(60),  nullable=False, unique=True)
     password = db.Column(db.String(255), nullable=False)
@@ -19,14 +19,18 @@ class Users(db.Model, UserMixin):
     def check_password(self, password):
         return check_password_hash(self.password, password)
 
+
 class SignUpForm(FlaskForm):
-    name     = StringField('Имя пользователя', validators=[DataRequired()])
-    password = PasswordField('Пароль',         validators=[DataRequired(), Length(min=6, max=32)])
-    email    = EmailField('Электронная почта', validators=[DataRequired(), Email()])
+    name     = StringField('Логин: ',  validators=[DataRequired()])
+    password = PasswordField('Пароль', validators=[DataRequired(), Length(min=6, max=32)])
+    email    = EmailField('Эл. почта', validators=[DataRequired(), validators.Email()])
+    submit   = SubmitField('Регистрация')
 
 class SignInForm(FlaskForm):
-    name     = StringField('Имя пользователя', validators=[DataRequired()])
-    password = PasswordField('Пароль',         validators=[InputRequired()])
+    name     = StringField('Логин: ',    validators=[DataRequired()])
+    password = PasswordField('Пароль: ', validators=[InputRequired()])
+    submit   = SubmitField('Войти')
+
 
 class OperationAddDb(db.Model):
     id        = db.Column(db.Integer,                            primary_key=True)
@@ -42,6 +46,7 @@ class OperationAdd(FlaskForm):
     oper_date = DateField('Дата операции:',                                         validators=[DataRequired()])
     user_id   = IntegerField('Номер пользователя:',                                 validators=[DataRequired()])
     submit    = SubmitField('Добавить операцию')
+
 
 class OperationFormRu(FlaskForm):
     fromDate = DateField(_('Начало: '), validators=[DataRequired()])
