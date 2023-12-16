@@ -1,11 +1,21 @@
-from flask             import Blueprint, render_template, redirect, url_for
-from config            import app, db
-from flask_login       import LoginManager, login_user, logout_user, login_required, current_user
-from models            import SignInForm, SignUpForm, Users
+from flask import render_template, redirect, url_for, Flask, request
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user, UserMixin
+from flask_sqlalchemy import SQLAlchemy
+from flask_wtf import FlaskForm
 from werkzeug.security import generate_password_hash, check_password_hash
-from config             import limiter
+from wtforms.fields.simple import EmailField, PasswordField, SubmitField, StringField
+from wtforms.validators import DataRequired, Length, Email
 
-lab = Blueprint('lab', __name__, template_folder='templates')
+app = Flask(__name__)
+db = SQLAlchemy()
+
+limiter = Limiter(get_remote_address,
+                  app            = app,
+                  default_limits = ["10 per minute"],
+                  storage_uri    = "memory://")
+
 
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
@@ -14,12 +24,13 @@ login_manager.login_view = 'login'
 def load_user(user_id):
     return Users.query.get(int(user_id))
 
-@lab.route('/lab/', methods=['GET'])
+@app.route('/lab/', methods=['GET', 'POST'])
 @login_required
-def profile():
+def index():
     return render_template('index.html', name=current_user.name)
 
-@lab.route('/lab/signup', methods=['GET', 'POST'])
+
+@app.route('/lab/signup', methods=['GET', 'POST'])
 def signup():
     form = SignUpForm()
 
@@ -41,14 +52,14 @@ def signup():
             db.session.add(new_user)
             db.session.commit()
 
-            return redirect(url_for('index'))
+            return redirect(url_for('lab.index'))
     else:
         message = 'Проверьте правильность введенных данных'
 
     return render_template('signup.html', form=form, message=message)
 
 
-@lab.route('/lab/login', methods=['GET', 'POST'])
+@app.route('/lab/login', methods=['GET', 'POST'])
 @limiter.limit('10/minute')
 def login():
     form = SignInForm()
@@ -68,7 +79,7 @@ def login():
             return render_template('login.html', form=form, message=message), 400
 
         login_user(user)
-        return redirect(url_for('index')), 200
+        return redirect(url_for('lab.index')), 200
     else:
         print(form.errors)
         message = 'Проверьте правильность введенных данных'
@@ -76,8 +87,86 @@ def login():
     return render_template('login.html', form=form, message=message), 400
 
 
-@lab.route('/lab/logout', methods=['GET'])
+@app.route('/lab/logout', methods=['GET'])
 @login_required
 def logout_get():
     logout_user()
-    return redirect(url_for('login'))
+    return redirect(url_for('lab.login'))
+
+
+class UserForm(FlaskForm):
+    email = EmailField("Email: ", validators=[DataRequired()])
+    password = PasswordField("Пароль: ", validators=[DataRequired(), Length(min=6, max=32)])
+    submit = SubmitField("Войти")
+
+
+
+@app.route('/v1/login', methods=['POST'])
+@limiter.limit('10/minute')
+def login_1():
+    form = UserForm(request.form)
+    if form.validate_on_submit():
+        email = form.email.data
+        password = form.password.data
+
+        remember = True if request.form.get('remember') else False
+        user = Users.query.filter_by(email=email).first()
+
+        if not user:
+            message = 'Пользователь не найден'
+            return render_template('login.html', form=form, message=message), 400
+
+        if not check_password_hash(user.password, password):
+            message = 'Неверный пароль'
+            return render_template('login.html', form=form, message=message), 400
+
+        login_user(user, remember=remember)
+        return redirect(url_for('login.profile')), 200
+
+    else:
+        print(form.errors)
+        message = 'Проверьте правильность введенных данных'
+    return render_template('login.html', form=form, message=message), 400
+
+
+
+@app.route('/', methods=['GET'])
+@login_required
+def profile():
+    return render_template('index.html', name=current_user.name)
+
+
+
+class Users(db.Model, UserMixin):
+    id       = db.Column(db.Integer,     primary_key=True)
+    email    = db.Column(db.String(255), unique=True)
+    password = db.Column(db.String(255), unique=True)
+    name     = db.Column(db.String(255))
+
+class SignInForm(FlaskForm):
+    email = EmailField("Email: ", validators=[DataRequired()])
+    password = PasswordField("Пароль: ", validators=[DataRequired(), Length(min=6, max=32)])
+    submit = SubmitField("Войти")
+
+
+class SignUpForm(FlaskForm):
+    name     = StringField("Имя",        validators=[DataRequired()])
+    email    = EmailField("Email: ",     validators=[DataRequired(), Email()])
+    password = PasswordField("Пароль: ", validators=[DataRequired(), Length(min=6, max=32)])
+    submit   = SubmitField("Зарегистрироваться")
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhost/SEM2LR6'
+app.config['SQLALCHEMY_TRACK_MODIFICATION'] = False
+app.config['WTF_CSRF_ENABLED'] = False
+app.secret_key = 'airtooooour'
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return Users.query.get(int(user_id))
+
+
+db.init_app(app)
+
+if __name__ == '__main__':
+    app.run(debug=True)
