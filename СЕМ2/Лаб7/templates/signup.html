@@ -2,11 +2,14 @@
 <html lang="en">
     <meta charset="UTF-8">
     <head>
-        <title>Вход</title>
+        <title>Регистрация</title>
     </head>
     <body>
-        <h1>Вход</h1>
-        <form method="POST" action="/v1/login">
+        <h1>Регистрация</h1>
+        <form method="POST" action="/v1/signup">
+
+            <p>{{ form.name.label() }}
+            <p>{{ form.name() }}
 
             <p>{{ form.email.label() }}
             <p>{{ form.email() }}
@@ -16,11 +19,6 @@
 
             {{ form.submit() }}
         </form>
-
-        <a href="{{ url_for('signup.signup_get') }}" class="navbar-item">
-            Зарегестрироваться
-        </a>
-
         {% if message %}
         <p>{{ message }}</p>
         {% endif %}

@@ -1,9 +1,10 @@
-from flask import Flask
-from routes import login
+from signup import signup
+from login import login
+from config import app
 
-app = Flask(__name__)
-
+app.register_blueprint(signup)
 app.register_blueprint(login)
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
     app.run(debug=True)
