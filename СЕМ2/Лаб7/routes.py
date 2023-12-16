@@ -1,10 +1,25 @@
-from flask import Blueprint, request, render_template, redirect, url_for
-from config import app, db
-from flask_login import login_user, login_required
-from models import SignInForm, SignUpForm, Users
+from flask             import Blueprint, render_template, redirect, url_for
+from config            import app, db
+from flask_login       import LoginManager, login_user, logout_user, login_required, current_user
+from models            import SignInForm, SignUpForm, Users
+from werkzeug.security import generate_password_hash, check_password_hash
+from config             import limiter
 
+lab = Blueprint('lab', __name__, template_folder='templates')
 
-@app.route('/signup', methods=['GET', 'POST'])
+login_manager = LoginManager(app)
+login_manager.login_view = 'login'
+
+@login_manager.user_loader
+def load_user(user_id):
+    return Users.query.get(int(user_id))
+
+@lab.route('/lab/', methods=['GET'])
+@login_required
+def profile():
+    return render_template('index.html', name=current_user.name)
+
+@lab.route('/lab/signup', methods=['GET', 'POST'])
 def signup():
     form = SignUpForm()
 
@@ -14,36 +29,34 @@ def signup():
         password = form.password.data
 
         existing_user = Users.query.filter_by(email=email).first()
+
         if existing_user:
-            message =  'Пользователь с указанным email уже существует'
-            return render_template('signup.html', form=form, message=message)
+            message = 'Пользователь с указанным email уже существует'
+            return render_template('login.html', form=form, message=message)
+        else:
+            new_user = Users(name=name, email=email, password = generate_password_hash(password))
 
-        new_user = Users(name=name, email=email, password = generate_password_hash(password, method='pbkdf2:sha256'))
-        db.session.add(new_user)
-        db.session.commit()
+            login_user(new_user)
 
-        return redirect(url_for('login.login_get'))
+            db.session.add(new_user)
+            db.session.commit()
 
+            return redirect(url_for('index'))
     else:
         message = 'Проверьте правильность введенных данных'
 
     return render_template('signup.html', form=form, message=message)
 
-@app.route('/web/login', methods=['GET'])
-def login_get():
-    form = UserForm(request.form)
-    return render_template('login.html', form=form)
 
-
-@app.route('/v1/login', methods=['POST'])
+@lab.route('/lab/login', methods=['GET', 'POST'])
 @limiter.limit('10/minute')
-def login_1():
-    form = UserForm(request.form)
+def login():
+    form = SignInForm()
+
     if form.validate_on_submit():
-        email = form.email.data
+        email    = form.email.data
         password = form.password.data
 
-        remember = True if request.form.get('remember') else False
         user = Users.query.filter_by(email=email).first()
 
         if not user:
@@ -54,28 +67,17 @@ def login_1():
             message = 'Неверный пароль'
             return render_template('login.html', form=form, message=message), 400
 
-        login_user(user, remember=remember)
-        return redirect(url_for('login.profile')), 200
-
+        login_user(user)
+        return redirect(url_for('index')), 200
     else:
         print(form.errors)
         message = 'Проверьте правильность введенных данных'
+
     return render_template('login.html', form=form, message=message), 400
 
 
-@app.route('/web/logout', methods=['GET'])
+@lab.route('/lab/logout', methods=['GET'])
 @login_required
 def logout_get():
     logout_user()
-    return redirect(url_for('login.login_get'))
-
-
-@app.route('/', methods=['GET'])
-@login_required
-def profile():
-    return render_template('index.html', name=current_user.name)
-
-
-@login_manager.user_loader
-def load_user(user_id):
-    return Users.query.get(int(user_id))
+    return redirect(url_for('login'))

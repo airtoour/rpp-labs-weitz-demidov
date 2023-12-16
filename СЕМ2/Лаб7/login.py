@@ -17,11 +17,6 @@ class UserForm(FlaskForm):
     submit = SubmitField("Войти")
 
 
-@login.route('/web/login', methods=['GET'])
-def login_get():
-    form = UserForm(request.form)
-    return render_template('login.html', form=form)
-
 
 @login.route('/v1/login', methods=['POST'])
 @limiter.limit('10/minute')

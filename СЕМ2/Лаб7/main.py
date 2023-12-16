@@ -1,10 +1,7 @@
-from signup import signup
-from login import login
 from config import app
+from routes import lab
 
-app.register_blueprint(signup)
-app.register_blueprint(login)
-
+app.register_blueprint(lab, url_prefix='/lab')
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -17,7 +17,7 @@ class SignInForm(FlaskForm):
 
 
 class SignUpForm(FlaskForm):
-    name = StringField("Имя", validators=[DataRequired()])
-    email = EmailField("Email: ", validators=[DataRequired(), Email()])
+    name     = StringField("Имя",        validators=[DataRequired()])
+    email    = EmailField("Email: ",     validators=[DataRequired(), Email()])
     password = PasswordField("Пароль: ", validators=[DataRequired(), Length(min=6, max=32)])
-    submit = SubmitField("Зарегистрироваться")
+    submit   = SubmitField("Зарегистрироваться")
