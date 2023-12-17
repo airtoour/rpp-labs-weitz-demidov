@@ -129,6 +129,12 @@ def login_1():
     return render_template('login.html', form=form, message=message), 400
 
 
+@app.route('/lab/zadaniye', methods=['GET', 'POST'])
+@login_required
+@limiter.limit("10/day")
+def zadaniye():
+    return render_template('zadaniye.html', username=current_user.name)
+
 
 @app.route('/', methods=['GET'])
 @login_required

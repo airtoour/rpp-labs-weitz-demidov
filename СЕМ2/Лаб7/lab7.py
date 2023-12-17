@@ -1,7 +1,7 @@
 import requests
 import time
 
-url = 'http://127.0.0.1:5000/lab/login'
+url = 'http://127.0.0.1:5000/lab/zadaniye'
 
 users_list = [
     {"email": "artur_3@bk.ru",       "password": "1234568"},
