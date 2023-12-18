@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, Flask, request
+from flask import render_template, redirect, url_for, Flask
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user, UserMixin
@@ -79,7 +79,7 @@ def login():
             return render_template('login.html', form=form, message=message), 400
 
         login_user(user)
-        return redirect(url_for('index')), 200
+        return redirect(url_for('zadaniye')), 200
     else:
         print(form.errors)
         message = 'Проверьте правильность введенных данных'
