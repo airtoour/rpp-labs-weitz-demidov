@@ -35,12 +35,13 @@ users_list = [
 for user in users_list:
     payload = {
         'email':    user['email'],
-        'password': user['password']}
+        'password': user['password']
+    }
     response = requests.post(url, data=payload)
 
     if response.status_code == 429:
-        print(f'Слишком много запросов. Пауза на 1 минуту...,  {response.status_code}')
-        time.sleep(60)
+        print(f'Слишком много запросов. Пауза на 1 день...,  {response.status_code}')
+        time.sleep(86400)
     elif response.status_code == 200:
         print(f'Логин: {user["email"]}, Пароль: {user["password"]}, {response.status_code}')
         break

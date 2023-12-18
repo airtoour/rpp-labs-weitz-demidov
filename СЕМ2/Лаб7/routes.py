@@ -13,7 +13,7 @@ db = SQLAlchemy()
 
 limiter = Limiter(get_remote_address,
                   app            = app,
-                  default_limits = ["10 per minute"],
+                  default_limits = ["10 per day"],
                   storage_uri    = "memory://")
 
 
@@ -52,7 +52,7 @@ def signup():
             db.session.add(new_user)
             db.session.commit()
 
-            return redirect(url_for('lab.index'))
+            return redirect(url_for('index'))
     else:
         message = 'Проверьте правильность введенных данных'
 
@@ -60,7 +60,7 @@ def signup():
 
 
 @app.route('/lab/login', methods=['GET', 'POST'])
-@limiter.limit('10/minute')
+@limiter.limit('10/day')
 def login():
     form = SignInForm()
 
@@ -79,7 +79,7 @@ def login():
             return render_template('login.html', form=form, message=message), 400
 
         login_user(user)
-        return redirect(url_for('lab.index')), 200
+        return redirect(url_for('index')), 200
     else:
         print(form.errors)
         message = 'Проверьте правильность введенных данных'
@@ -89,7 +89,7 @@ def login():
 
 @app.route('/lab/logout', methods=['GET'])
 @login_required
-def logout_get():
+def logout():
     logout_user()
     return redirect(url_for('lab.login'))
 
@@ -98,35 +98,6 @@ class UserForm(FlaskForm):
     email = EmailField("Email: ", validators=[DataRequired()])
     password = PasswordField("Пароль: ", validators=[DataRequired(), Length(min=6, max=32)])
     submit = SubmitField("Войти")
-
-
-
-@app.route('/v1/login', methods=['POST'])
-@limiter.limit('10/minute')
-def login_1():
-    form = UserForm(request.form)
-    if form.validate_on_submit():
-        email = form.email.data
-        password = form.password.data
-
-        remember = True if request.form.get('remember') else False
-        user = Users.query.filter_by(email=email).first()
-
-        if not user:
-            message = 'Пользователь не найден'
-            return render_template('login.html', form=form, message=message), 400
-
-        if not check_password_hash(user.password, password):
-            message = 'Неверный пароль'
-            return render_template('login.html', form=form, message=message), 400
-
-        login_user(user, remember=remember)
-        return redirect(url_for('login.profile')), 200
-
-    else:
-        print(form.errors)
-        message = 'Проверьте правильность введенных данных'
-    return render_template('login.html', form=form, message=message), 400
 
 
 @app.route('/lab/zadaniye', methods=['GET', 'POST'])
