@@ -7,10 +7,7 @@
     <body>
         <h1>Добавить операцию</h1>
 
-        <form action="/delete-operation" method="post">
-            <a href="{{ url_for('logout') }}">Выйти</a>
-            <a href="{{ url_for('registration')">Регистрация</a>
-            <a href="{{ url_for('operation')">Главная страница</a>
+        <form action="{{ url_for('delete_operation') }}" method="post">
 
             {% if message %}
                 <p>{{ message }}</p>
@@ -21,6 +18,15 @@
             <p>{{ form.id.label }} {{ form.id() }}</p>
 
             {{ form.submit() }}
+
+            <br><br>
+            <a href="{{ url_for('logout') }}">Выйти</a>
+            <br><br>
+            <a href="{{ url_for('registration') }}">Регистрация</a>
+            <br><br>
+            <a href="{{ url_for('find_operation') }}">Главная страница</a>
+            <br><br>
+            <a href="{{ url_for('add_operation') }}">Добавить операцию</a>
         </form>
     </body>
 </html>

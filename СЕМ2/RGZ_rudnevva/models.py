@@ -19,21 +19,23 @@ class Users(db.Model, UserMixin):
 
         return f'Пользователь: {id}, {name}, {email}, {password}'
 
-class RegistrationForm(FlaskForm):
-    name = StringField('Имя пользователя: ', validators=[DataRequired()])
+class Registration(FlaskForm):
+    name = StringField('Логин: ', validators=[DataRequired()])
     password = PasswordField('Пароль: ', validators=[DataRequired(), Length(min=6, max=32)])
-    email = EmailField('Электронная почта: ', validators=[DataRequired(), Email()])
+    email = EmailField('Эл. почта: ', validators=[DataRequired(), Email()])
+    submit = SubmitField('Регистрация')
 
 class Login(FlaskForm):
     name = StringField('Имя пользователя', validators=[DataRequired()])
     password = PasswordField('Пароль', validators=[InputRequired()])
+    submit = SubmitField('Войти')
 
 class FindOperation(FlaskForm):
     from_date = DateField('Начало: ', validators=[DataRequired()])
     end_date = DateField('Конец: ', validators=[DataRequired()])
     submit = SubmitField('Найти')
 
-class DbOperation(db.Model):
+class Operation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     operation_type = db.Column(db.String(12), nullable=False)
     operation_amount = db.Column(db.Float, nullable=False)
