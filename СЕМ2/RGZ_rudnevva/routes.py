@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for
+from flask import request, render_template, redirect, url_for
 from flask_login import LoginManager, login_user, current_user, login_required, logout_user
 from config import app, db
 from models import Users, Login, RegistrationForm, FindOperation, DbOperation, AddOperation, DeleteOperation
@@ -15,32 +15,32 @@ def load_user(name):
 
 @app.route('/registration', methods=['GET', 'POST'])
 def registration():
-    app.logger.error("Reached /registration endpoint")
     form = RegistrationForm()
 
-    if form.validate_on_submit():
-        name = form.name.data
-        email = form.email.data
-        password = form.password.data
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            name = form.name.data
+            email = form.email.data
+            password = form.password.data
 
-        hashed_password = generate_password_hash(password)
+            hashed_password = generate_password_hash(password)
 
-        user = Users.query.filter_by(email=email).first()
+            user = Users.query.filter_by(email=email).first()
 
-        if user:
-            error_message = 'Пользователь уже существует!'
-            return render_template('registration.html', form=form, error_message=error_message)
-        else:
-            new_user = Users(name=name, email=email, password=hashed_password)
+            if user:
+                error_message = 'Пользователь уже существует!'
+                return render_template('registration.html', form=form, error_message=error_message)
+            else:
+                new_user = Users(name=name, email=email, password=hashed_password)
 
-            db.session.add(new_user)
-            db.session.commit()
+                db.session.add(new_user)
+                db.session.commit()
 
-            login_user(new_user)
+                login_user(new_user)
 
-            return redirect(url_for('operation'))
-
-    return render_template('registration.html', form=form)
+                return redirect(url_for('operation'))
+    else:
+        return render_template('registration.html', form=form)
 
 
 @app.route('/login', methods=['GET', 'POST'])
