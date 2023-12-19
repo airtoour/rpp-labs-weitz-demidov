@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Добавить операцию</title>
+</head>
+    <body>
+        <h1>Добавить операцию</h1>
+
+        <form method="post">
+            <a href="{{ url_for('logout') }}">Выйти</a>
+            <br><br>
+
+            {{ form.hidden_tag() }}
+
+            <p>{{ form.id.label }}</p>
+            <p>{{ form.id() }}</p>
+
+            <p>{{ form.oper_type.label }}</p>
+            <p>{{ form.oper_type() }}</p>
+
+            <p>{{ form.amount.label }}</p>
+            <p>{{ form.amount() }}</p>
+
+            <p>{{ form.oper_date.label }}</p>
+            <p>{{ form.oper_date() }}</p>
+
+            <p>{{ form.user_id.label }}</p>
+            <p>{{ form.user_id() }}</p>
+
+            {{ form.submit() }}
+        </form>
+
+        {% if message %}
+            <p>{{ message }}</p>
+        {% endif %}
+    </body>
+</html>

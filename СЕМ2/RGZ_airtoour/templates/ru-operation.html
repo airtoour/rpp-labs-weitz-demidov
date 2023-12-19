@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Операции</title>
+</head>
+    <body>
+        <h1>Операции</h1>
+
+        <form method="post">
+            <a href="{{ url_for('logout') }}">Выйти</a>
+            <br>
+            <a href="{{ url_for('operation.view_operation', lang='en') }}">EN</a>
+            <br><br>
+
+            {{ form.hidden_tag() }}
+
+            <label for="fromDate">{{ form.fromDate.label.text }}</label>
+            {{ form.fromDate() }}
+            <br>
+
+            <label for="endDate">{{ form.endDate.label.text }}</label>
+            {{ form.endDate() }}
+            <br>
+
+            {{ form.submit() }}
+        </form>
+
+        <h2>Лист операций</h2>
+        <br><br>
+        <ul>
+            {% for operation in operations %}
+                <li>{{ operation.date }} - {{ operation.amount }}</li>
+            {% endfor %}
+        </ul>
+        <br><br>
+
+        <p>Общий доход:   {{ total_income }}</p>
+        <p>Общие расходы: {{ total_expense }}</p>
+
+        <a href="{{ url_for('operation.add_operation') }}">Добавить операцию</a>
+    </body>
+</html>
