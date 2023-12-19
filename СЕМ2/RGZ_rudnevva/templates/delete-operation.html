@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Добавить операцию</title>
+</head>
+    <body>
+        <h1>Добавить операцию</h1>
+
+        <form action="/delete-operation" method="post">
+            <a href="{{ url_for('logout') }}">Выйти</a>
+            <a href="{{ url_for('registration')">Регистрация</a>
+            <a href="{{ url_for('operation')">Главная страница</a>
+
+            {% if message %}
+                <p>{{ message }}</p>
+            {% endif %}
+
+            {{ form.hidden_tag() }}
+
+            <p>{{ form.id.label }} {{ form.id() }}</p>
+
+            {{ form.submit() }}
+        </form>
+    </body>
+</html>
