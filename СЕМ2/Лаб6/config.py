@@ -7,6 +7,6 @@ db = SQLAlchemy()
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhost:5432/SEM2LR6'
 app.config['SQLAlchemy_TRACK_MODIFIVATTION'] = False
-app.config['SECRET_KEY'] = 'airtoour_shiva'
+app.config['SECRET_KEY'] = 'gleb_roma'
 
 db.init_app(app)

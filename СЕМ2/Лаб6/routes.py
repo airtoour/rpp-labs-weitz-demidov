@@ -13,11 +13,17 @@ def load_user(user_id):
 
 
 @app.route('/index', methods = ['GET', 'POST'])
+# @login_required означает, что доступно только для авторизированных пользователей
 @login_required
 def index():
-    if current_user.is_authenticated:
-        email = current_user.email
-        return render_template('index.html', email=email)
+    # В переменную password мы берем наш пароль, под которым мы вошли, current_user отвечает за текущего пользователя
+    password = current_user.password
+
+    # render_template, этим самым мы переходим на страницу, которая работает через файл zadanie.html и там,
+    # через переменную password (красным светится) выводим пароль, который мы записали
+    # Если в форме увидите много разных символов, не пугайтесь, это все-лишь зашифрованный пароль, который и надо было вывести по заданию
+    # После того, как вы ВСЕ ПОНЯЛИ, УДАЛИТЕ ЭТИ КОММЕНТЫ, ЧТОБЫ ПРЕПОД НЕ УВИДЕЛ
+    return render_template('index.html', password=password)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -30,7 +36,11 @@ def login():
 
         if user and check_password_hash(user.password, password):
             login_user(user)
-            return redirect(url_for('index'))
+
+            # Я закомментарил строку, для задания, если хотите посмотреть, как работает лаба поменяйте местами комменты
+
+            # return redirect(url_for('index'))
+            return redirect(url_for('zadanie'))
         else:
             err_message = 'Такого пользователя не существует!'
             return render_template('signup.html', err_message=err_message)
@@ -55,11 +65,16 @@ def signup():
 
         if checked_pass:
             new_user = Users(name=name, email=email, password=pass_hash)
+
+            # Заносим в базу нового пользователя
             db.session.add(new_user)
+            # Сохраняем в базе его
             db.session.commit()
 
+            # login_user сразу же авторизует пользователя
             login_user(new_user)
 
+            # Перенаправляемся сразу на главную страницу
             return redirect(url_for('index'))
 
     return render_template('signup.html')
