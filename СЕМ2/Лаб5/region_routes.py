@@ -1,5 +1,5 @@
 from flask  import Blueprint, request, render_template
-from models import Region, RegionForm, CarTaxParam, RegionFormDelete, PlusMinusForm
+from models import Region, RegionForm, CarTaxParam, RegionFormDelete
 from config import db
 
 region = Blueprint('region', __name__, template_folder='templates')

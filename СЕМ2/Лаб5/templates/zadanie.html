@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Задание</title>
+</head>
+    <body>
+        <form action="/tax/zadanie" method="post">
+            {{ form.hidden_tag() }}
+
+            <p>{{ form.number_1.label() }} {{ form.number_1() }}</p>
+            <p>{{ form.number_2.label() }} {{ form.number_2() }}</p>
+
+            {{ form.submit() }}
+
+            {% if message %}
+              <p>{{ message }}</p>
+            {% endif %}
+        </form>
+    </body>
+</html>
