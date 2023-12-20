@@ -7,7 +7,10 @@
     <body>
         <h1>Добавить операцию</h1>
 
-        <form method="post">
+        <form action="{{ url_for('operation.add_operation') }}" method="post">
+            <a href="{{ url_for('logout') }}">Выйти</a>
+            <br><br>
+
             {{ form.hidden_tag() }}
 
             <p>{{ form.id.label }}</p>
@@ -22,15 +25,7 @@
             <p>{{ form.operation_date.label }}</p>
             <p>{{ form.operation_date() }}</p>
 
-            <p>{{ form.user_id.label }}</p>
-            <p>{{ form.user_id() }}</p>
-
             {{ form.submit() }}
-
-            <div>
-                <a href="{{ url_for('logout') }}">Выйти</a>
-                <a href="{{ url_for('operation.view_operation') }}">Операции</a>
-            </div>
         </form>
 
         {% if message %}

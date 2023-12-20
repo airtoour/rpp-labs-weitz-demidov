@@ -22,19 +22,21 @@ class SignUpForm(FlaskForm):
     name     = StringField('Имя пользователя: ', validators=[DataRequired()])
     password = PasswordField('Пароль: ', validators=[DataRequired(), Length(min=6, max=32)])
     email    = EmailField('Электронная почта: ', validators=[DataRequired(), Email()])
+    submit   = SubmitField('Зарегистрироваться')
 
 class SignInForm(FlaskForm):
     name     = StringField('Имя пользователя', validators=[DataRequired()])
     password = PasswordField('Пароль', validators=[InputRequired()])
+    submit   = SubmitField('Войти')
 
-class OperationDb(db.Model):
+class Operation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     operation_type = db.Column(db.String(12), nullable=False)
     operation_amount = db.Column(db.Float, nullable=False)
     operation_date = db.Column(db.DateTime, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
-class Operation(FlaskForm):
+class OperationAdd(FlaskForm):
     id = IntegerField('Номер операции: ', validators=[DataRequired()])
     operation_type = SelectField('Тип операции: ', choices=[(1, "Доход"), (2, "Расход")], validators=[DataRequired()])
     operation_amount = FloatField('Сумма: ', validators=[DataRequired()])
@@ -44,5 +46,5 @@ class Operation(FlaskForm):
 
 class OperationForm(FlaskForm):
     from_date = DateField('Начало: ', validators=[DataRequired()])
-    end_date = DateField('Конец: ', validators=[DataRequired()])
-    submit = SubmitField('Найти')
+    end_date  = DateField('Конец: ', validators=[DataRequired()])
+    submit    = SubmitField('Найти')
