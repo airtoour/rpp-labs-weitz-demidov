@@ -12,17 +12,18 @@ app = Flask(__name__)
 db = SQLAlchemy()
 
 limiter = Limiter(get_remote_address,
-                  app            = app,
-                  default_limits = ["10 per day"],
-                  storage_uri    = "memory://")
-
+                  app=app,
+                  default_limits=["10 per day"],
+                  storage_uri="memory://")
 
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
+
 @login_manager.user_loader
 def load_user(user_id):
     return Users.query.get(int(user_id))
+
 
 @app.route('/lab/', methods=['GET', 'POST'])
 @login_required
@@ -35,8 +36,8 @@ def signup():
     form = SignUpForm()
 
     if form.validate_on_submit():
-        name     = form.name.data
-        email    = form.email.data
+        name = form.name.data
+        email = form.email.data
         password = form.password.data
 
         existing_user = Users.query.filter_by(email=email).first()
@@ -45,7 +46,7 @@ def signup():
             message = 'Пользователь с указанным email уже существует'
             return render_template('login.html', form=form, message=message)
         else:
-            new_user = Users(name=name, email=email, password = generate_password_hash(password))
+            new_user = Users(name=name, email=email, password=generate_password_hash(password))
 
             login_user(new_user)
 
@@ -65,7 +66,7 @@ def login():
     form = SignInForm()
 
     if form.validate_on_submit():
-        email    = form.email.data
+        email = form.email.data
         password = form.password.data
 
         user = Users.query.filter_by(email=email).first()
@@ -113,12 +114,12 @@ def profile():
     return render_template('index.html', name=current_user.name)
 
 
-
 class Users(db.Model, UserMixin):
-    id       = db.Column(db.Integer,     primary_key=True)
-    email    = db.Column(db.String(255), unique=True)
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(255), unique=True)
     password = db.Column(db.String(255), unique=True)
-    name     = db.Column(db.String(255))
+    name = db.Column(db.String(255))
+
 
 class SignInForm(FlaskForm):
     email = EmailField("Email: ", validators=[DataRequired()])
@@ -127,10 +128,11 @@ class SignInForm(FlaskForm):
 
 
 class SignUpForm(FlaskForm):
-    name     = StringField("Имя",        validators=[DataRequired()])
-    email    = EmailField("Email: ",     validators=[DataRequired(), Email()])
+    name = StringField("Имя", validators=[DataRequired()])
+    email = EmailField("Email: ", validators=[DataRequired(), Email()])
     password = PasswordField("Пароль: ", validators=[DataRequired(), Length(min=6, max=32)])
-    submit   = SubmitField("Зарегистрироваться")
+    submit = SubmitField("Зарегистрироваться")
+
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhost/SEM2LR6'
 app.config['SQLALCHEMY_TRACK_MODIFICATION'] = False

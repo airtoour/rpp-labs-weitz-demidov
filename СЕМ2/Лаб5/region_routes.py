@@ -98,6 +98,5 @@ def plus_minus():
             message = ''
     else:
         message = 'Проверьте правильность введенных данных'
-        #message += f'\nErrors: {form.errors}'
 
     return render_template('plus-minus.html', form=form, message=message)
