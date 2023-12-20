@@ -1,8 +1,8 @@
 from flask import Blueprint, render_template, redirect, url_for, request
-from flask_login       import LoginManager, login_user, current_user, login_required, logout_user
-from config            import app, db
-from models            import Users, OperationForm, Operation, OperationAdd, OperationUpdate, Signin, Signup
-from datetime          import datetime, timedelta
+from flask_login import LoginManager, login_user, current_user, login_required, logout_user
+from config import app, db
+from models import Users, OperationForm, Operation, OperationAdd, OperationUpdate, Signin, Signup
+from datetime import datetime, timedelta
 
 operation = Blueprint('operation', __name__, template_folder='templates')
 
@@ -31,7 +31,7 @@ def login():
             err_message = 'Такого пользователя не существует или введен неверный пароль!'
             return render_template('login.html', err_message=err_message)
 
-    return render_template('login.html')
+    return render_template('login.html', form=form)
 
 
 @app.route('/registration', methods=['GET', 'POST'])
@@ -62,9 +62,9 @@ def registration():
                 db.session.rollback()
                 err_message = 'Произошла какая-то ошибка!'
 
-                return render_template('registration.html', err_message=err_message)
+                return render_template('registration.html', form=form, err_message=err_message)
 
-    return render_template('registration.html')
+    return render_template('registration.html', form=form)
 
 
 @app.route('/logout', methods=['GET', 'POST'])

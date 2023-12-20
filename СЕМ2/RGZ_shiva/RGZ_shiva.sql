@@ -7,8 +7,8 @@ create table users(
 
 create table operation(
 	id serial primary key,
-	operation_type varchar(12) not null,
-	operation_amount numeric not null,
-	operation_date timestamp not null,
+	oper_type varchar(12) not null,
+	amount numeric not null,
+	oper_date timestamp not null,
 	user_id integer references users(id) not null
 );
