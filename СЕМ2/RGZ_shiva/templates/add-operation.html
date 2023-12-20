@@ -10,7 +10,7 @@
         <form method="post">
             <a href="{{ url_for('logout') }}">Выйти</a>
             <br><br>
-            <a href="{{ url_for('operation.view_operation') }}">Журнал операций</a>
+            <a href="{{ url_for('operation.find_operation') }}">Журнал операций</a>
             <br><br>
             <a href="{{ url_for('operation.change_operation') }}">Обновление операции</a>
 
@@ -19,17 +19,14 @@
             <p>{{ form.id.label }}</p>
             <p>{{ form.id() }}</p>
 
-            <p>{{ form.operation_type.label }}</p>
-            <p>{{ form.operation_type() }}</p>
+            <p>{{ form.oper_type.label }}</p>
+            <p>{{ form.oper_type() }}</p>
 
-            <p>{{ form.operation_amount.label }}</p>
-            <p>{{ form.operation_amount() }}</p>
+            <p>{{ form.amount.label }}</p>
+            <p>{{ form.amount() }}</p>
 
-            <p>{{ form.operation_date.label }}</p>
-            <p>{{ form.operation_date() }}</p>
-
-            <p>{{ form.user_id.label }}</p>
-            <p>{{ form.user_id() }}</p>
+            <p>{{ form.oper_date.label }}</p>
+            <p>{{ form.oper_date() }}</p>
 
             {{ form.submit() }}
         </form>

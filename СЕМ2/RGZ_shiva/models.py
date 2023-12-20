@@ -18,37 +18,39 @@ class Users(db.Model, UserMixin):
     def check_password(self, password):
         return check_password_hash(self.password, password)
 
-class SignUpForm(FlaskForm):
-    name     = StringField('Имя пользователя: ', validators=[DataRequired()])
+class Signup(FlaskForm):
+    name = StringField('Имя пользователя: ', validators=[DataRequired()])
     password = PasswordField('Пароль: ', validators=[DataRequired(), Length(min=6, max=32)])
-    email    = EmailField('Электронная почта: ', validators=[DataRequired(), Email()])
+    email = EmailField('Электронная почта: ', validators=[DataRequired(), Email()])
+    submit = SubmitField('Регистрация')
 
-class SignInForm(FlaskForm):
+class Signin(FlaskForm):
     name     = StringField('Имя пользователя', validators=[DataRequired()])
     password = PasswordField('Пароль', validators=[InputRequired()])
+    submit = SubmitField('Войти')
 
-class OperationDb(db.Model):
+class Operation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    operation_type = db.Column(db.String(12), nullable=False)
-    operation_amount = db.Column(db.Float, nullable=False)
-    operation_date = db.Column(db.DateTime, nullable=False)
+    oper_type = db.Column(db.String(12), nullable=False)
+    amount = db.Column(db.Float, nullable=False)
+    oper_date = db.Column(db.DateTime, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
-class Operation(FlaskForm):
+class OperationAdd(FlaskForm):
     id = IntegerField('Номер операции: ', validators=[DataRequired()])
-    operation_type = SelectField('Тип операции: ', choices=[(1, "Доход"), (2, "Расход")], validators=[DataRequired()])
-    operation_amount = FloatField('Сумма: ', validators=[DataRequired()])
-    operation_date = DateField('Дата операции: ', validators=[DataRequired()])
+    oper_type = SelectField('Тип операции: ', choices=[(1, "Доход"), (2, "Расход")], validators=[DataRequired()])
+    amount = FloatField('Сумма: ', validators=[DataRequired()])
+    oper_date = DateField('Дата операции: ', validators=[DataRequired()])
     user_id = IntegerField('Номер пользователя: ', validators=[DataRequired()])
     submit = SubmitField('Добавить операцию')
 
 class OperationUpdate(FlaskForm):
-    id = IntegerField('Номер операции: ')
-    operation_type = SelectField('Тип операции: ', choices=[(1, "Доход"), (2, "Расход")])
-    operation_amount = FloatField('Дата операции: ')
-    operation_date = DateField('Дата операции: ')
-    user_id = IntegerField('Номер пользователя: ')
-    submit = SubmitField('Обновить операцию')
+    id = IntegerField('Номер операции: ', validators=[DataRequired()])
+    oper_type = SelectField('Тип операции: ', choices=[(1, "Доход"), (2, "Расход")], validators=[DataRequired()])
+    amount = FloatField('Сумма: ', validators=[DataRequired()])
+    oper_date = DateField('Дата операции: ', validators=[DataRequired()])
+    user_id = IntegerField('Номер пользователя: ', validators=[DataRequired()])
+    submit = SubmitField('Обновить операцию', validators=[DataRequired()])
 
 class OperationForm(FlaskForm):
     from_date = DateField('Начало: ', validators=[DataRequired()])

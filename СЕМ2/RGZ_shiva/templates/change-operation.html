@@ -8,35 +8,33 @@
     <body>
         <h1>Обновить операцию</h1>
 
+        {% if message %}
+            <p>{{ message }}</p>
+        {% endif %}
+
         <form method="post">
-            <a href="{{ url_for('logout') }}">Выйти</a>
-            <br><br>
-            <a href="{{ url_for('operation.view_operation') }}">Журнал операций</a>
-            <br><br>
-            <a href="{{ url_for('operation.add_operation') }}">Добавить операцию</a>
 
             {{ form.hidden_tag() }}
 
             <p>{{ form.id.label }}</p>
             <p>{{ form.id() }}</p>
 
-            <p>{{ form.operation_type.label }}</p>
-            <p>{{ form.operation_type() }}</p>
+            <p>{{ form.oper_type.label }}</p>
+            <p>{{ form.oper_type() }}</p>
 
-            <p>{{ form.operation_amount.label }}</p>
-            <p>{{ form.operation_amount() }}</p>
+            <p>{{ form.amount.label }}</p>
+            <p>{{ form.amount() }}</p>
 
-            <p>{{ form.operation_date.label }}</p>
-            <p>{{ form.operation_date() }}</p>
-
-            <p>{{ form.user_id.label }}</p>
-            <p>{{ form.user_id() }}</p>
+            <p>{{ form.oper_date.label }}</p>
+            <p>{{ form.oper_date() }}</p>
 
             {{ form.submit() }}
-        </form>
 
-        {% if message %}
-            <p>{{ message }}</p>
-        {% endif %}
+            <a href="{{ url_for('logout') }}">Выйти</a>
+            <br><br>
+            <a href="{{ url_for('operation.find_operation') }}">Журнал операций</a>
+            <br><br>
+            <a href="{{ url_for('operation.add_operation') }}">Добавить операцию</a>
+        </form>
     </body>
 </html>

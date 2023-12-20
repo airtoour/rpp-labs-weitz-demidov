@@ -7,36 +7,40 @@
     </head>
 
     <body>
-        <h1>Журнал операций</h1>
+        <h1>Главная страница</h1>
+        <h2>Журнал операций</h2>
+
+        {% if message %}
+            <p>{{ message }}</p>
+        {% endif %}
 
         <form method="post">
-            <a href="{{ url_for('logout') }}">Выйти из аккаунта</a>
-            <br><br>
-            <a href="{{ url_for('operation.add_operation') }}">Добавить операцию</a>
-            <br><br>
-            <a href="{{ url_for('operation.change_operation') }}">Обновить операцию</a>
-            <br><br>
             {{ form.hidden_tag() }}
 
-            {{ form.from_date.label }}
-            {{ form.from_date() }}
-            <br><br>
-            {{ form.end_date.label }}
-            {{ form.end_date() }}
+            <p>{{ form.from_date.label }} {{ form.from_date() }}</p>
+            <p>{{ form.end_date.label }} {{ form.end_date() }}</p>
 
             {{ form.submit() }}
         </form>
 
         <h2>Лист операций</h2>
-        <br><br>
+
         <ul>
             {% for operation in operations %}
-                <li>{{ operation.date }} - {{ operation.amount }}</li>
+                <li>{{ operation.oper_date }} - {{ operation.amount }}</li>
             {% endfor %}
         </ul>
-        <br><br>
 
-        <p>Общий доход:   {{ total_income }}</p>
+        <p>Общий доход: {{ total_income }}</p>
         <p>Общие расходы: {{ total_expense }}</p>
+
+        <br><br>
+        <a href="{{ url_for('logout') }}">Выйти</a>
+        <br><br>
+        <a href="{{ url_for('registration') }}">Регистрация</a>
+        <br><br>
+        <a href="{{ url_for('operation.add_operation') }}">Добавить операцию</a>
+        <br><br>
+        <a href="{{ url_for('operation.change_operation') }}">Обновление операции</a>
     </body>
 </html>
