@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for
+from flask import Blueprint, render_template, redirect, url_for, request
 from flask_login       import LoginManager, login_user, current_user, login_required, logout_user
 from config            import app, db
 from models            import Users, OperationForm, OperationAdd, Operation, SignInForm, SignUpForm
@@ -72,9 +72,11 @@ def registration():
 @app.route('/logout', methods=['GET', 'POST'])
 @login_required
 def logout():
+    form = SignInForm()
+
     logout_user()
     err_message = 'Вы вышли из аккаунта'
-    return render_template('login.html', err_message=err_message)
+    return render_template('login.html', form=form, err_message=err_message)
 
 
 @operation.route('/', methods=['GET', 'POST'])
@@ -111,33 +113,32 @@ def view_operation():
 @login_required
 def add_operation():
     form = OperationAdd()
-    print('Объявили форму')
 
-    if form.validate_on_submit():
+    if request.method == 'POST':
         oper_id = form.id.data
-        operation_type = form.operation_type.data
-        operation_amount = form.operation_amount.data
-        operation_date = form.operation_date.data
+        oper_type = form.operation_type.data
+        amount = form.operation_amount.data
+        date = form.operation_date.data
         user_id = current_user.id
-        print('Данные ввели')
 
-        if Operation.query.filter_by(id=oper_id).first():
-            message = f'ID: {oper_id}. Такая операция уже существует!'
+
+        oper = Operation.query.filter_by(id=oper_id).first()
+
+        if oper:
+            message = 'Такая операция уже существует!'
         else:
             try:
-                operations = Operation(id=oper_id, operation_type=operation_type, operation_amount=operation_amount,
-                                       operation_date=operation_date, user_id=user_id)
-                print('Сформировали в бд')
+                operations = Operation(id=oper_id, operation_type=oper_type, operation_amount=amount,
+                                       operation_date=date, user_id=user_id)
                 db.session.add(operations)
-                print('добавили в бд')
                 db.session.commit()
-                print('сохранили')
-                message = f'Операция на сумму {operation_amount} успешно добавлена!'
-            except Exception as e:
+
+                message = f'Операция на сумму {amount} успешно добавлена!'
+            except:
                 db.session.rollback()
-                app.logger.error(f"Произошла ошибка: {e}")
-                message = 'Произошла ошибка во время добавления операции!'
+                message = 'Ошибка во время добавления операции!'
 
         return render_template('add-operation.html', form=form, message=message)
+
 
     return render_template('add-operation.html', form=form)
