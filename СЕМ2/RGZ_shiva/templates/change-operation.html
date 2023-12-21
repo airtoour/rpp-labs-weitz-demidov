@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <title>Обновление</title>
+    </head>
+
+    <body>
+        <h1>Обновить операцию</h1>
+
+        {% if message %}
+            <p>{{ message }}</p>
+        {% endif %}
+
+        <form method="post">
+
+            {{ form.hidden_tag() }}
+
+            <p>{{ form.id.label }}</p>
+            <p>{{ form.id() }}</p>
+
+            <p>{{ form.oper_type.label }}</p>
+            <p>{{ form.oper_type() }}</p>
+
+            <p>{{ form.amount.label }}</p>
+            <p>{{ form.amount() }}</p>
+
+            <p>{{ form.oper_date.label }}</p>
+            <p>{{ form.oper_date() }}</p>
+
+            {{ form.submit() }}
+
+            <a href="{{ url_for('logout') }}">Выйти</a>
+            <br><br>
+            <a href="{{ url_for('operation.find_operation') }}">Журнал операций</a>
+            <br><br>
+            <a href="{{ url_for('operation.add_operation') }}">Добавить операцию</a>
+        </form>
+    </body>
+</html>
