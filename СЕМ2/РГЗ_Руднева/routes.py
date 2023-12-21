@@ -125,13 +125,11 @@ def add_operation():
                 db.session.commit()
 
                 message = f'Операция на сумму {amount} успешно добавлена!'
-            except Exception as e:
+            except:
                 db.session.rollback()
                 message = 'Ошибка во время добавления операции!'
 
         return render_template('add-operation.html', form=form, message=message)
-    else:
-        print('Валидация?', form.errors)
 
     return render_template('add-operation.html', form=form)
 
