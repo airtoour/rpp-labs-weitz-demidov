@@ -38,26 +38,19 @@ def calculate_tax():
 
 # Это эндпоинт для задания, а, то есть отдельный сайт
 # Импорт необходимых модулей и классов.
-# Ссылка будет такая: http://127.0.0.1:5000/tax/zadanie
-@tax.route('/zadanie', methods=['GET', 'POST'])
-def adding_numbs():
-    # Создание экземпляра формы AddingNumsForm
-    form = AddingNumsForm()
+# Ссылка будет такая: http://127.0.0.1:5000/tax/zadanie-3-5 (числа любые)
+@tax.route('/zadanie-<number_1>-<number_2>', methods=['GET'])
+def adding_numbs(number_1, number_2):
 
-    # Проверка, была ли отправлена форма методом POST и прошла ли валидацию
-    if form.validate_on_submit():
-        # Если форма прошла валидацию, получаем данные из полей формы
-        number_1 = form.number_1.data
-        number_2 = form.number_2.data
+    # Преобразование входных строк в числа
+    number_1 = int(number_1)
+    number_2 = int(number_2)
 
-        # Вычисление суммы введенных чисел
-        result = number_1 + number_2
+    # Записываем в result сумму чисел, которую мы напишем в адресе сайта
+    result = number_1 + number_2
 
-        # Формирование сообщения с результатом
-        message = f'Результат: {result}'
+    # Формирование сообщения с результатом
+    message = f'Результат: {result}'
 
-        # Отображение шаблона 'zadanie.html' с формой и сообщением
-        return render_template('zadanie.html', form=form, message=message)
-
-    # Если форма не была отправлена или не прошла валидацию, отображаем шаблон 'zadanie.html' с формой
-    return render_template('zadanie.html', form=form)
+    # Отображение шаблона 'zadanie.html' с формой и сообщением
+    return render_template('zadanie.html', message=message)
