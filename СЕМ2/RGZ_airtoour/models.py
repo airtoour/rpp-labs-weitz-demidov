@@ -3,9 +3,9 @@ from flask_login        import UserMixin
 from werkzeug.security  import generate_password_hash, check_password_hash
 from wtforms            import (IntegerField, FloatField, StringField, EmailField,
                                 PasswordField, DateField, SubmitField, SelectField, validators)
-from wtforms.validators import DataRequired, InputRequired, Length, Email
+from wtforms.validators import DataRequired, InputRequired, Length
 from config             import db
-from flask_babel        import _  # Используется для локализации. Замена функции gettext
+from flask_babel        import _
 
 class Users(db.Model, UserMixin):
     id       = db.Column(db.Integer,     primary_key=True)

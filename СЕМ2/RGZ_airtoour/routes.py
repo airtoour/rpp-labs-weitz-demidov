@@ -64,10 +64,9 @@ def signup():
                 login_user(new_user)
 
                 return redirect(url_for('operation.view_operation', lang='ru'))
-            except Exception as e:
+            except:
                 db.session.rollback()
                 err_message = 'Произошла какая-то ошибка!'
-                app.logger.error(str(e))
                 return render_template('registration.html', err_message=err_message)
 
     return render_template('registration.html', form=form)
@@ -123,13 +122,13 @@ def add_operation():
             message = f'Операция с таким ID: {oper_id} уже существует!'
         else:
             try:
-                operations = OperationAddDb(id=oper_id, oper_type=oper_type, amount=amount, oper_date=date, user_id=user_id)
+                operations = OperationAddDb(id=oper_id, oper_type=oper_type,
+                                            amount=amount, oper_date=date, user_id=user_id)
                 db.session.add(operations)
                 db.session.commit()
                 message = f'Операция {oper_id} успешно добавлена!'
-            except Exception as e:
+            except:
                 db.session.rollback()
-                app.logger.error(f'Error during operation addition: {str(e)}')
                 message = 'Произошла ошибка во время добавления!'
 
         return render_template('add_operation.html', form=form, message=message)
