@@ -41,7 +41,7 @@ def calculate_tax():
 # Ссылка будет такая: http://127.0.0.1:5000/tax/zadanie-3-5 (числа любые)
 @tax.route('/zadanie-<number_1>-<number_2>', methods=['GET'])
 def adding_numbs(number_1, number_2):
-
+    form = AddingNumsForm(request.form)
     # Преобразование входных строк в числа
     number_1 = int(number_1)
     number_2 = int(number_2)
@@ -53,4 +53,4 @@ def adding_numbs(number_1, number_2):
     message = f'Результат: {result}'
 
     # Отображение шаблона 'zadanie.html' с формой и сообщением
-    return render_template('zadanie.html', message=message)
+    return render_template('zadanie.html',form=form, message=message)
