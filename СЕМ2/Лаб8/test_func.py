@@ -13,7 +13,7 @@ class TestGetTriangleType(unittest.TestCase):
 
     def test_incorrect_triangle_sides(self):
         with self.assertRaises(IncorrectTriangleSides):
-            get_triangle_type(0, 0, 0)
+            get_triangle_type(20, 2, 2)
 
 
 if __name__ == '__main__':
