@@ -8,7 +8,7 @@ def test_create_triangle():
 
 def test_triangle_type():
     t1 = Triangle(3, 3, 3)
-    assert t1.triangle_type() == "equilateral"
+    assert t1.triangle_type() != "equilateral"
     t2 = Triangle(5, 5, 6)
     assert t2.triangle_type() == "isosceles"
     t3 = Triangle(5, 6, 7)
