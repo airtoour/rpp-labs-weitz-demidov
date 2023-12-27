@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Описание операции</title>
+    </head>
+
+    <body>
+        <form action="/find_descr" method="post">
+            {{ form.hidden_tag() }}
+
+            <p>{{ form.id.label() }} {{ form.id() }}</p>
+
+            {{ form.submit() }}
+
+            <br><br><br><br>
+
+            {% if result %}
+                {{ result }}
+            {% endif %}
+        </form>
+    </body>
+</html>
